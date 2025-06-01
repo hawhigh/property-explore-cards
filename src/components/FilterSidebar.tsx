@@ -13,8 +13,8 @@ interface FilterSidebarProps {
 
 const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
   const [priceRange, setPriceRange] = useState([0, 2000000]);
-  const [bedrooms, setBedrooms] = useState<string>('');
-  const [bathrooms, setBathrooms] = useState<string>('');
+  const [bedrooms, setBedrooms] = useState<string>('any');
+  const [bathrooms, setBathrooms] = useState<string>('any');
   const [propertyType, setPropertyType] = useState<string>('all');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
@@ -34,8 +34,8 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
   const updateFilters = (newFilters: any = {}) => {
     const filters = {
       priceRange,
-      bedrooms: bedrooms ? parseInt(bedrooms) : null,
-      bathrooms: bathrooms ? parseInt(bathrooms) : null,
+      bedrooms: bedrooms === 'any' ? null : parseInt(bedrooms),
+      bathrooms: bathrooms === 'any' ? null : parseInt(bathrooms),
       propertyType,
       amenities: selectedAmenities,
       ...newFilters
@@ -45,8 +45,8 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
 
   const clearFilters = () => {
     setPriceRange([0, 2000000]);
-    setBedrooms('');
-    setBathrooms('');
+    setBedrooms('any');
+    setBathrooms('any');
     setPropertyType('all');
     setSelectedAmenities([]);
     onFilterChange({});
@@ -101,13 +101,13 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
           </label>
           <Select value={bedrooms} onValueChange={(value) => {
             setBedrooms(value);
-            updateFilters({ bedrooms: value ? parseInt(value) : null });
+            updateFilters({ bedrooms: value === 'any' ? null : parseInt(value) });
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Any" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="any">Any</SelectItem>
               <SelectItem value="1">1+</SelectItem>
               <SelectItem value="2">2+</SelectItem>
               <SelectItem value="3">3+</SelectItem>
@@ -124,13 +124,13 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
           </label>
           <Select value={bathrooms} onValueChange={(value) => {
             setBathrooms(value);
-            updateFilters({ bathrooms: value ? parseInt(value) : null });
+            updateFilters({ bathrooms: value === 'any' ? null : parseInt(value) });
           }}>
             <SelectTrigger>
               <SelectValue placeholder="Any" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any</SelectItem>
+              <SelectItem value="any">Any</SelectItem>
               <SelectItem value="1">1+</SelectItem>
               <SelectItem value="2">2+</SelectItem>
               <SelectItem value="3">3+</SelectItem>
