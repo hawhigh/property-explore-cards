@@ -54,6 +54,9 @@ const SingleProperty = () => {
     );
   }
 
+  // Calculate price per night from total price (assuming monthly price)
+  const pricePerNight = property.price ? Math.round(property.price / 30) : 650;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -73,17 +76,17 @@ const SingleProperty = () => {
                 address: property.address,
                 city: property.city,
                 state: property.state,
-                country: property.country || 'Greece',
+                country: 'Greece', // Default fallback
                 bedrooms: property.bedrooms || 3,
                 bathrooms: property.bathrooms || 2,
-                maxGuests: property.maxGuests || 6,
-                poolSize: property.poolSize || 'Resort Pool',
+                maxGuests: 6, // Default fallback
+                poolSize: 'Resort Pool', // Default fallback
                 price: property.price || 1850000,
-                rating: property.rating || 4.8,
-                reviews: property.reviews || 89,
+                rating: 4.8, // Default fallback
+                reviews: 89, // Default fallback
                 yearBuilt: property.year_built || 2010,
-                renovated: property.renovated || 2022,
-                groundsSize: property.groundsSize || 'Resort Grounds'
+                renovated: 2022, // Default fallback
+                groundsSize: 'Resort Grounds' // Default fallback
               }} />
 
               {/* Description */}
@@ -106,7 +109,7 @@ const SingleProperty = () => {
             <div className="lg:col-span-1">
               <BookingCalendar 
                 propertyId={property.id} 
-                pricePerNight={property.pricePerNight || 650} 
+                pricePerNight={pricePerNight}
               />
             </div>
           </div>
