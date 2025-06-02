@@ -4,21 +4,23 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Search } from 'lucide-react';
+import { Plus, LayoutGrid, List } from 'lucide-react';
 import Header from '@/components/Header';
 import PropertyManagementCard from '@/components/PropertyManagementCard';
 import AddPropertyModal from '@/components/AddPropertyModal';
 import EditPropertyModal from '@/components/EditPropertyModal';
+import PropertyFilters from '@/components/PropertyFilters';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const PropertyManagement = () => {
   const { user } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({});
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: properties = [], isLoading, refetch } = useQuery({
-    queryKey: ['user-properties', user?.id, searchTerm],
+    queryKey: ['user-properties', user?.id, filters],
     queryFn: async () => {
       let query = supabase
         .from('properties')
@@ -26,8 +28,24 @@ const PropertyManagement = () => {
         .eq('owner_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (searchTerm) {
-        query = query.ilike('title', `%${searchTerm}%`);
+      if (filters.search) {
+        query = query.ilike('title', `%${filters.search}%`);
+      }
+
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+
+      if (filters.propertyType) {
+        query = query.eq('property_type', filters.propertyType);
+      }
+
+      if (filters.priceMin) {
+        query = query.gte('price', filters.priceMin);
+      }
+
+      if (filters.priceMax) {
+        query = query.lte('price', filters.priceMax);
       }
 
       const { data, error } = await query;
@@ -61,6 +79,14 @@ const PropertyManagement = () => {
     );
   }
 
+  // Group properties by status for better organization
+  const groupedProperties = properties.reduce((acc, property) => {
+    const status = property.status || 'active';
+    if (!acc[status]) acc[status] = [];
+    acc[status].push(property);
+    return acc;
+  }, {} as Record<string, typeof properties>);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -69,28 +95,36 @@ const PropertyManagement = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Property Management</h1>
-            <p className="text-gray-600 mt-2">Manage your property listings</p>
+            <p className="text-gray-600 mt-2">Manage all your property listings</p>
           </div>
-          <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Property
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Property
+            </Button>
+          </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search properties..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+        {/* Filters */}
+        <PropertyFilters onFiltersChange={setFilters} totalCount={properties.length} />
 
-        {/* Properties Grid */}
+        {/* Properties Display */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
@@ -102,9 +136,9 @@ const PropertyManagement = () => {
             <div className="bg-white rounded-lg shadow-sm p-8 max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Properties Found</h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm ? 'No properties match your search.' : 'You haven\'t added any properties yet.'}
+                {Object.keys(filters).length > 0 ? 'No properties match your filters.' : 'You haven\'t added any properties yet.'}
               </p>
-              {!searchTerm && (
+              {Object.keys(filters).length === 0 && (
                 <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Property
@@ -113,15 +147,48 @@ const PropertyManagement = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map((property) => (
-              <PropertyManagementCard
-                key={property.id}
-                property={property}
-                onPropertyUpdate={refetch}
-              />
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="all">All ({properties.length})</TabsTrigger>
+              {Object.entries(groupedProperties).map(([status, props]) => (
+                <TabsTrigger key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({props.length})
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="all">
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-4"
+              }>
+                {properties.map((property) => (
+                  <PropertyManagementCard
+                    key={property.id}
+                    property={property}
+                    onPropertyUpdate={refetch}
+                  />
+                ))}
+              </div>
+            </TabsContent>
+
+            {Object.entries(groupedProperties).map(([status, statusProperties]) => (
+              <TabsContent key={status} value={status}>
+                <div className={viewMode === 'grid' 
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-4"
+                }>
+                  {statusProperties.map((property) => (
+                    <PropertyManagementCard
+                      key={property.id}
+                      property={property}
+                      onPropertyUpdate={refetch}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
             ))}
-          </div>
+          </Tabs>
         )}
 
         {/* Modals */}

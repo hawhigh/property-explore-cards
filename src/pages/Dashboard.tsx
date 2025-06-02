@@ -14,6 +14,9 @@ import MyFavorites from '@/components/MyFavorites';
 import MyProperties from '@/components/MyProperties';
 import AdminPanel from '@/components/AdminPanel';
 import Header from '@/components/Header';
+import PropertyStats from '@/components/PropertyStats';
+import QuickActions from '@/components/QuickActions';
+import RecentActivity from '@/components/RecentActivity';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -49,10 +52,10 @@ const Dashboard = () => {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Property Management Dashboard</h1>
               <p className="text-gray-600 mt-2">Welcome back, {user?.email || 'User'}!</p>
               {isAdmin && (
                 <p className="text-red-600 font-semibold mt-1">Administrator Access</p>
@@ -71,84 +74,58 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-2">
-                      <Home className="h-5 w-5 text-blue-500" />
-                      <div>
-                        <p className="text-2xl font-bold">3</p>
-                        <p className="text-sm text-gray-600">Active Properties</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="space-y-8">
+                {/* Property Statistics */}
+                <PropertyStats />
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-5 w-5 text-green-500" />
-                      <div>
-                        <p className="text-2xl font-bold">12</p>
-                        <p className="text-sm text-gray-600">Total Bookings</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Quick Actions */}
+                <QuickActions isAdmin={isAdmin} />
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-2">
-                      <Heart className="h-5 w-5 text-red-500" />
-                      <div>
-                        <p className="text-2xl font-bold">8</p>
-                        <p className="text-sm text-gray-600">Saved Favorites</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                {/* Recent Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <RecentActivity />
+                  
+                  {/* Property Performance Summary */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Property Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                          <div>
+                            <p className="font-semibold text-blue-900">Top Performing</p>
+                            <p className="text-sm text-blue-700">Villa Lucilla</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-blue-900">€1,850</p>
+                            <p className="text-xs text-blue-600">This month</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 border rounded-lg">
+                            <p className="text-2xl font-bold text-green-600">89%</p>
+                            <p className="text-xs text-gray-600">Occupancy Rate</p>
+                          </div>
+                          <div className="text-center p-3 border rounded-lg">
+                            <p className="text-2xl font-bold text-blue-600">4.8</p>
+                            <p className="text-xs text-gray-600">Avg Rating</p>
+                          </div>
+                        </div>
 
-              <div className="mt-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <Button 
-                        onClick={() => window.location.href = '/property-management'}
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <Home className="h-6 w-6 mb-2" />
-                        Manage Properties
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <Calendar className="h-6 w-6 mb-2" />
-                        View Bookings
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="h-20 flex flex-col items-center justify-center"
-                      >
-                        <Heart className="h-6 w-6 mb-2" />
-                        My Favorites
-                      </Button>
-                      {isAdmin && (
                         <Button 
-                          variant="outline" 
-                          className="h-20 flex flex-col items-center justify-center border-red-200 text-red-600 hover:bg-red-50"
+                          onClick={() => window.location.href = '/property-management'}
+                          className="w-full"
+                          variant="outline"
                         >
-                          <Settings className="h-6 w-6 mb-2" />
-                          Admin Panel
+                          <Home className="h-4 w-4 mr-2" />
+                          Manage All Properties
                         </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </TabsContent>
 
