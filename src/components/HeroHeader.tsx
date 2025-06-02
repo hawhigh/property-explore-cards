@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, User, LogOut, Settings, Filter } from 'lucide-react';
+import LanguageSelector from '@/components/LanguageSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +23,7 @@ interface HeroHeaderProps {
 
 const HeroHeader = ({ searchQuery, setSearchQuery, showFilters, setShowFilters }: HeroHeaderProps) => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm border-b sticky top-0 z-50">
@@ -34,7 +37,7 @@ const HeroHeader = ({ searchQuery, setSearchQuery, showFilters, setShowFilters }
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-blue-500 transition-colors" />
               <Input
-                placeholder="Search properties by location, type, or amenities..."
+                placeholder={t('header.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-4 py-3 rounded-full border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-lg shadow-sm"
@@ -43,13 +46,15 @@ const HeroHeader = ({ searchQuery, setSearchQuery, showFilters, setShowFilters }
           </div>
 
           <div className="flex items-center space-x-4">
+            <LanguageSelector />
+            
             <Button 
               variant="outline" 
               className="hidden md:flex items-center gap-2 rounded-full"
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="h-4 w-4" />
-              Filters
+              {t('header.filters')}
             </Button>
             
             {user ? (
@@ -63,18 +68,18 @@ const HeroHeader = ({ searchQuery, setSearchQuery, showFilters, setShowFilters }
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center">
                       <Settings className="h-4 w-4 mr-2" />
-                      Dashboard
+                      {t('header.dashboard')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
+                    {t('header.signout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button asChild className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                <Link to="/auth">Sign In</Link>
+                <Link to="/auth">{t('header.signin')}</Link>
               </Button>
             )}
           </div>

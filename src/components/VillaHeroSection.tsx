@@ -1,6 +1,7 @@
 
 import VillaStats from '@/components/VillaStats';
 import RoleBasedHeroContent from '@/components/RoleBasedHeroContent';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface VillaHeroSectionProps {
   bedrooms: number;
@@ -17,6 +18,8 @@ const VillaHeroSection = ({
   pricePerNight, 
   rating 
 }: VillaHeroSectionProps) => {
+  const { t } = useLanguage();
+
   return (
     <section className="relative py-12 md:py-20 px-4 overflow-hidden">
       {/* Enhanced Background */}
@@ -26,9 +29,9 @@ const VillaHeroSection = ({
       <div className="container mx-auto text-center relative z-10">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Villa Lucilla
+            {t('hero.title')}
             <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Cyprus Paradise
+              {t('hero.subtitle')}
             </span>
           </h1>
           

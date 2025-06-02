@@ -2,8 +2,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Wifi, Car, Waves, UtensilsCrossed, AirVent, Shield, Star } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const EnhancedVillaShowcase = () => {
+  const { t } = useLanguage();
+
   const highlights = [
     {
       icon: Waves,
@@ -61,14 +64,13 @@ const EnhancedVillaShowcase = () => {
         {/* Villa Highlights */}
         <div className="text-center mb-12">
           <Badge className="bg-blue-100 text-blue-700 px-4 py-2 text-lg mb-4">
-            ✨ Villa Lucilla Features
+            ✨ {t('villa.features')}
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Luxury Meets Comfort
+            {t('villa.luxury.comfort')}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Experience the perfect blend of Mediterranean charm and modern amenities in our 
-            3-bedroom villa with private pool in the exclusive Anthorina Gardens Resort.
+            {t('villa.description')}
           </p>
         </div>
 

@@ -1,16 +1,18 @@
 
 import { Button } from '@/components/ui/button';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Users, Settings, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const RoleBasedHeroContent = () => {
   const { user, isAdmin, isAgent, userRole, isLoading } = useSecureAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   if (isLoading) {
-    return <div className="animate-pulse">Loading personalized content...</div>;
+    return <div className="animate-pulse">{t('loading')}</div>;
   }
 
   // Unknown/Guest User Content
@@ -19,11 +21,10 @@ const RoleBasedHeroContent = () => {
       <div className="text-center space-y-6">
         <div className="space-y-4">
           <Badge className="bg-blue-100 text-blue-700 px-4 py-2 text-lg">
-            ✨ Experience Luxury in Cyprus
+            ✨ {t('hero.experience')}
           </Badge>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover Villa Lucilla - Your gateway to an unforgettable Mediterranean escape. 
-            Premium amenities, stunning views, and world-class hospitality await.
+            {t('hero.description')}
           </p>
         </div>
         
@@ -33,7 +34,7 @@ const RoleBasedHeroContent = () => {
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
             onClick={() => navigate('/auth')}
           >
-            Sign In to Book
+            {t('hero.signin.to.book')}
           </Button>
           <Button 
             variant="outline" 
@@ -41,7 +42,7 @@ const RoleBasedHeroContent = () => {
             className="px-8 py-4 text-lg rounded-full border-2 border-blue-200 hover:border-blue-300"
             onClick={() => navigate('/single')}
           >
-            Explore Villa
+            {t('hero.explore.villa')}
           </Button>
         </div>
       </div>
@@ -135,7 +136,7 @@ const RoleBasedHeroContent = () => {
     <div className="text-center space-y-6">
       <div className="space-y-4">
         <Badge className="bg-purple-100 text-purple-700 px-4 py-2 text-lg">
-          🌟 Welcome Back, {user.user_metadata?.full_name || 'Guest'}
+          🌟 {t('hero.welcome.back')}, {user.user_metadata?.full_name || 'Guest'}
         </Badge>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Ready for your next Cyprus adventure? Villa Lucilla is waiting with 
@@ -150,7 +151,7 @@ const RoleBasedHeroContent = () => {
           onClick={() => navigate('/single')}
         >
           <Calendar className="h-5 w-5 mr-2" />
-          Book Your Stay
+          {t('hero.book.your.stay')}
         </Button>
         <Button 
           variant="outline" 
@@ -158,7 +159,7 @@ const RoleBasedHeroContent = () => {
           className="px-8 py-4 text-lg rounded-full border-2 border-purple-200 hover:border-purple-300"
           onClick={() => navigate('/dashboard')}
         >
-          My Bookings
+          {t('hero.my.bookings')}
         </Button>
       </div>
     </div>
