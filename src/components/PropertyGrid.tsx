@@ -36,6 +36,8 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
   const { data: properties = [], isLoading, refetch } = useQuery({
     queryKey: ['properties', filters],
     queryFn: async () => {
+      console.log('PropertyGrid: Fetching properties with filters:', filters);
+      
       let query = supabase
         .from('properties')
         .select('*')
@@ -61,7 +63,12 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('PropertyGrid: Error fetching properties:', error);
+        throw error;
+      }
+
+      console.log('PropertyGrid: Properties fetched:', data?.length || 0, data);
 
       // Get user favorites if logged in
       if (user) {
@@ -81,6 +88,59 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
       return data.map(property => ({ ...property, is_favorited: false }));
     },
   });
+
+  // Add a function to create sample data if no properties exist
+  const createSampleProperty = async () => {
+    console.log('Creating sample property...');
+    
+    const sampleProperty = {
+      title: 'Villa Lucilla - Luxury Cyprus Getaway',
+      description: 'Beautiful 3-bedroom villa with private pool in Protaras, Cyprus',
+      price: 185,
+      bedrooms: 3,
+      bathrooms: 2,
+      sqft: 1500,
+      address: 'Anthorina Gardens Resort',
+      city: 'Protaras',
+      state: 'Famagusta',
+      zip_code: '5296',
+      property_type: 'villa',
+      status: 'active',
+      owner_id: user?.id,
+      amenities: ['Private Pool', 'WiFi', 'Air Conditioning', 'Kitchen', 'Parking', 'Garden'],
+      images: [
+        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop',
+        'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop'
+      ],
+      featured: true
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert(sampleProperty)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating sample property:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create sample property",
+          variant: "destructive",
+        });
+      } else {
+        console.log('Sample property created:', data);
+        toast({
+          title: "Success",
+          description: "Sample property created successfully",
+        });
+        refetch();
+      }
+    } catch (error) {
+      console.error('Error creating sample property:', error);
+    }
+  };
 
   const toggleFavorite = async (propertyId: string, isFavorited: boolean) => {
     if (!user) {
@@ -128,6 +188,33 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
         {[...Array(6)].map((_, i) => (
           <div key={i} className="h-80 bg-gray-200 animate-pulse rounded-lg"></div>
         ))}
+      </div>
+    );
+  }
+
+  // Show empty state with option to create sample data
+  if (properties.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="max-w-md mx-auto">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Properties Found</h3>
+          <p className="text-gray-600 mb-6">
+            There are currently no active properties in the system.
+          </p>
+          {user && (
+            <div className="space-y-3">
+              <Button 
+                onClick={createSampleProperty}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Create Sample Villa Property
+              </Button>
+              <p className="text-sm text-gray-500">
+                This will create a sample Villa Lucilla property for testing
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
