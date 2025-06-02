@@ -36,6 +36,12 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const { data: availability = [] } = useQuery({
     queryKey: ['availability', propertyId],
     queryFn: async () => {
+      // For now, return empty array since we're using a fallback property ID
+      // In a real implementation, this would fetch availability for the actual property
+      if (propertyId === 'villa-lucilla') {
+        return [];
+      }
+      
       const { data, error } = await supabase
         .from('property_availability')
         .select('*')
