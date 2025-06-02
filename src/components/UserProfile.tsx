@@ -10,12 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
+type UserRole = 'user' | 'agent' | 'admin';
+
 interface Profile {
   id: string;
   email: string;
   full_name: string;
   phone: string;
-  role: string;
+  role: UserRole;
 }
 
 const UserProfile = () => {
@@ -48,7 +50,7 @@ const UserProfile = () => {
     }
   };
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = async (updates: { full_name?: string; phone?: string }) => {
     setUpdating(true);
     try {
       const { error } = await supabase

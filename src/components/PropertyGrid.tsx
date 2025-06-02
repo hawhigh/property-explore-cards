@@ -77,7 +77,7 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
         }));
       }
 
-      return data;
+      return data.map(property => ({ ...property, is_favorited: false }));
     },
   });
 

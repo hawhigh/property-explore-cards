@@ -116,8 +116,8 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           <Label>Select Dates</Label>
           <Calendar
             mode="range"
-            selected={selectedDates}
-            onSelect={setSelectedDates}
+            selected={selectedDates.from && selectedDates.to ? { from: selectedDates.from, to: selectedDates.to } : undefined}
+            onSelect={(range) => setSelectedDates(range || {})}
             disabled={unavailableDates}
             className="rounded-md border"
           />
