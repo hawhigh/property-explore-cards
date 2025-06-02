@@ -9,6 +9,7 @@ import AvailabilitySection from '@/components/AvailabilitySection';
 import VillaDetailsSection from '@/components/VillaDetailsSection';
 import WhyChooseSection from '@/components/WhyChooseSection';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import EnhancedVillaShowcase from '@/components/EnhancedVillaShowcase';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,6 +91,8 @@ const Index = () => {
         onClose={() => setShowEnhancedBooking(false)}
         pricePerNight={pricePerNight}
       />
+
+      <EnhancedVillaShowcase />
 
       <AvailabilitySection />
       
