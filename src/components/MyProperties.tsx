@@ -31,7 +31,7 @@ const MyProperties = () => {
         throw error;
       }
 
-      console.log('Properties fetched:', data?.length || 0);
+      console.log('Properties fetched successfully:', data?.length || 0);
       return data || [];
     },
     enabled: !!user?.id,
@@ -152,7 +152,7 @@ const MyProperties = () => {
                     {property.status || 'inactive'}
                   </Badge>
                   <p className="text-lg font-bold text-green-600 mt-1">
-                    €{property.price || 0}/night
+                    €{property.price || 0}/month
                   </p>
                 </div>
               </div>

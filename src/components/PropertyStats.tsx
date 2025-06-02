@@ -48,7 +48,7 @@ const PropertyStats = () => {
 
         // Get bookings and favorites only if we have properties
         if (propertyIds.length > 0) {
-          // Get bookings
+          // Get bookings for properties owned by the user
           const { data: bookingsData, error: bookingsError } = await supabase
             .from('bookings')
             .select('id, total_price, status')
@@ -60,7 +60,7 @@ const PropertyStats = () => {
             bookings = bookingsData || [];
           }
 
-          // Get favorites
+          // Get favorites for properties owned by the user
           const { data: favoritesData, error: favoritesError } = await supabase
             .from('favorites')
             .select('id')
