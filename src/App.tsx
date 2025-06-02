@@ -23,6 +23,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/villa-lucilla" element={<SingleProperty />} />
+            <Route path="/single" element={<SingleProperty />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/property-management" element={<PropertyManagement />} />
             <Route path="/auth" element={<Auth />} />
