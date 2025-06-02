@@ -11,10 +11,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import PropertyManagementCard from '@/components/PropertyManagementCard';
 
+type PropertyStatusFilter = 'all' | 'active' | 'pending' | 'rented' | 'sold';
+
 const PropertyListingManagement = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<PropertyStatusFilter>('all');
 
   const { data: properties = [], isLoading, refetch } = useQuery({
     queryKey: ['owner-properties', user?.id, searchQuery, statusFilter],
@@ -92,7 +94,7 @@ const PropertyListingManagement = () => {
       </Card>
 
       {/* Property Tabs by Status */}
-      <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+      <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as PropertyStatusFilter)}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="active">Active ({statusCounts.active})</TabsTrigger>
