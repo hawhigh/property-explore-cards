@@ -12,16 +12,26 @@ import EditPropertyModal from '@/components/EditPropertyModal';
 import PropertyFilters from '@/components/PropertyFilters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+interface PropertyFilters {
+  search?: string;
+  status?: string;
+  propertyType?: string;
+  priceMin?: number;
+  priceMax?: number;
+}
+
 const PropertyManagement = () => {
   const { user } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<PropertyFilters>({});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: properties = [], isLoading, refetch } = useQuery({
     queryKey: ['user-properties', user?.id, filters],
     queryFn: async () => {
+      if (!user) return [];
+
       let query = supabase
         .from('properties')
         .select('*')
