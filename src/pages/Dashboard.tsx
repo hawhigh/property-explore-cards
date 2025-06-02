@@ -1,11 +1,13 @@
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Heart, Plus } from 'lucide-react';
+import { Home, Calendar, Heart, Plus, Settings } from 'lucide-react';
 import UserProfile from '@/components/UserProfile';
 import MyBookings from '@/components/MyBookings';
 import MyFavorites from '@/components/MyFavorites';
@@ -16,13 +18,31 @@ import Header from '@/components/Header';
 const Dashboard = () => {
   const { user, loading } = useAuth();
 
-  if (loading) {
+  // Check if user is admin
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  if (loading || profileLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
+
+  const isAdmin = profile?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,16 +54,20 @@ const Dashboard = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
               <p className="text-gray-600 mt-2">Welcome back, {user?.email || 'User'}!</p>
+              {isAdmin && (
+                <p className="text-red-600 font-semibold mt-1">Administrator Access</p>
+              )}
             </div>
             <UserProfile />
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-1 md:grid-cols-4 lg:w-[400px]">
+            <TabsList className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-5 lg:w-[500px]' : 'md:grid-cols-4 lg:w-[400px]'}`}>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="bookings">Bookings</TabsTrigger>
               <TabsTrigger value="favorites">Favorites</TabsTrigger>
+              {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
@@ -113,6 +137,15 @@ const Dashboard = () => {
                         <Heart className="h-6 w-6 mb-2" />
                         My Favorites
                       </Button>
+                      {isAdmin && (
+                        <Button 
+                          variant="outline" 
+                          className="h-20 flex flex-col items-center justify-center border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <Settings className="h-6 w-6 mb-2" />
+                          Admin Panel
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -143,6 +176,12 @@ const Dashboard = () => {
             <TabsContent value="favorites">
               <MyFavorites />
             </TabsContent>
+
+            {isAdmin && (
+              <TabsContent value="admin">
+                <AdminPanel />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </div>

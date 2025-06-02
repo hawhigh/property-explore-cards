@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type UserRole = 'user' | 'agent' | 'admin';
 
@@ -69,6 +70,32 @@ const UserProfile = () => {
       toast({
         title: "Error",
         description: "Failed to update profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const promoteToAdmin = async () => {
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'admin' })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      setProfile(prev => prev ? { ...prev, role: 'admin' } : null);
+      toast({
+        title: "Admin Access Granted",
+        description: "You now have administrator privileges. Please refresh the page to see admin features.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to grant admin access.",
         variant: "destructive",
       });
     } finally {
@@ -143,6 +170,37 @@ const UserProfile = () => {
             
             <TabsContent value="settings">
               <div className="space-y-4">
+                {profile?.role !== 'admin' && (
+                  <div className="border border-yellow-200 bg-yellow-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-yellow-800 mb-2">Developer Access</h3>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      For testing purposes, you can grant yourself administrator privileges to manage all listings and bookings.
+                    </p>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" className="text-yellow-700 border-yellow-300">
+                          Grant Admin Access
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Grant Administrator Access?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will give you full access to manage all properties, bookings, and users in the system. 
+                            This action is intended for development and testing purposes.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={promoteToAdmin} disabled={updating}>
+                            {updating ? 'Processing...' : 'Grant Access'}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
+                
                 <Button
                   variant="destructive"
                   onClick={signOut}
