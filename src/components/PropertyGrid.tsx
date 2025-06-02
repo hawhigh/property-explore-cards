@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 interface Property {
   id: string;
@@ -32,7 +33,37 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const { data: properties = [], isLoading, refetch } = useQuery({
+  // Villa Lucilla data
+  const villaLucilla = {
+    id: 'villa-lucilla',
+    title: 'Villa Lucilla - Anthorina Gardens Resort',
+    price: 1850,
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 256,
+    address: 'Konnou street 17, Anthorina Gardens Resort',
+    city: 'Protaras',
+    state: 'Famagusta District',
+    images: [
+      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
+    ],
+    property_type: 'Resort Villa',
+    amenities: [
+      'Private Swimming Pool',
+      'Air Conditioning',
+      'Walking Distance Beaches',
+      'Free Parking',
+      'Wi-Fi',
+      'Barbecue Area'
+    ],
+    is_favorited: false
+  };
+  
+  const { data: dbProperties = [], isLoading, refetch } = useQuery({
     queryKey: ['properties', filters],
     queryFn: async () => {
       let query = supabase
@@ -80,6 +111,9 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
       return data.map(property => ({ ...property, is_favorited: false }));
     },
   });
+
+  // Combine Villa Lucilla with database properties
+  const allProperties = [villaLucilla, ...dbProperties];
 
   const toggleFavorite = async (propertyId: string, isFavorited: boolean) => {
     if (!user) {
@@ -133,14 +167,16 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {properties.map((property) => (
+      {allProperties.map((property) => (
         <div key={property.id} className="relative">
-          <PropertyCard 
-            property={{
-              ...property,
-              propertyType: property.property_type
-            }} 
-          />
+          <Link to={property.id === 'villa-lucilla' ? '/single' : `/property-view/${property.id}`}>
+            <PropertyCard 
+              property={{
+                ...property,
+                propertyType: property.property_type
+              }} 
+            />
+          </Link>
           <Button
             variant="ghost"
             size="icon"
