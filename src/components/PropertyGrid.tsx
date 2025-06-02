@@ -8,6 +8,7 @@ import { Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import type { Database } from '@/integrations/supabase/types';
 
 interface Property {
   id: string;
@@ -93,7 +94,7 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
   const createSampleProperty = async () => {
     console.log('Creating sample property...');
     
-    const sampleProperty = {
+    const sampleProperty: Database['public']['Tables']['properties']['Insert'] = {
       title: 'Villa Lucilla - Luxury Cyprus Getaway',
       description: 'Beautiful 3-bedroom villa with private pool in Protaras, Cyprus',
       price: 185,
@@ -105,7 +106,7 @@ const PropertyGrid = ({ filters }: PropertyGridProps) => {
       state: 'Famagusta',
       zip_code: '5296',
       property_type: 'villa',
-      status: 'active',
+      status: 'active' as Database['public']['Enums']['property_status'],
       owner_id: user?.id,
       amenities: ['Private Pool', 'WiFi', 'Air Conditioning', 'Kitchen', 'Parking', 'Garden'],
       images: [
