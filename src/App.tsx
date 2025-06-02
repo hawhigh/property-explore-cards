@@ -10,6 +10,7 @@ import PropertyDetail from '@/pages/PropertyDetail';
 import Dashboard from '@/pages/Dashboard';
 import PropertyManagement from '@/pages/PropertyManagement';
 import Auth from '@/pages/Auth';
+import SimplifiedAdminDashboard from '@/components/admin/SimplifiedAdminDashboard';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ function App() {
             <Route path="/single" element={<SingleProperty />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/property-management" element={<PropertyManagement />} />
+            <Route path="/admin" element={<SimplifiedAdminDashboard />} />
             <Route path="/auth" element={<Auth />} />
           </Routes>
         </AuthProvider>

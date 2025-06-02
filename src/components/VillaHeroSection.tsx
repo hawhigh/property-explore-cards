@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import VillaStats from '@/components/VillaStats';
+import { useNavigate } from 'react-router-dom';
 
 interface VillaHeroSectionProps {
   bedrooms: number;
@@ -19,6 +20,8 @@ const VillaHeroSection = ({
   onBookingClick, 
   onManagementClick 
 }: VillaHeroSectionProps) => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative py-12 md:py-20 px-4 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5"></div>
@@ -60,6 +63,14 @@ const VillaHeroSection = ({
               onClick={onManagementClick}
             >
               Manage Property
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="px-8 py-4 text-lg rounded-full border-2 border-red-200 hover:border-red-300"
+              onClick={() => navigate('/admin')}
+            >
+              Admin Panel
             </Button>
           </div>
         </div>
