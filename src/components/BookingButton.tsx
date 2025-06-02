@@ -17,7 +17,7 @@ const BookingButton = ({ onBooking, isPending, isDisabled }: BookingButtonProps)
       disabled={isPending || isDisabled}
     >
       <CalendarIcon className="h-4 w-4 mr-2" />
-      {isPending ? 'Submitting...' : 'Book Villa Lucilla'}
+      {isPending ? 'Submitting Booking...' : 'Submit Booking Request'}
     </Button>
   );
 };

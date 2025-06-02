@@ -44,24 +44,29 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
         }
       }
 
-      const { error } = await supabase
+      // Create guest booking with user_id explicitly set to null
+      const { data, error } = await supabase
         .from('bookings')
         .insert({
           ...bookingData,
           property_id: actualPropertyId,
-          user_id: null, // No user ID for guest bookings
-        });
+          user_id: null, // Explicitly set to null for guest bookings
+        })
+        .select()
+        .single();
 
       if (error) {
         console.log('Booking error:', error);
         throw error;
       }
+
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability', propertyId] });
       toast({
-        title: "Booking Request Submitted",
-        description: "Your booking request has been submitted. We'll contact you soon to confirm.",
+        title: "Booking Request Submitted Successfully!",
+        description: "Your booking request has been submitted. We'll contact you within 24 hours to confirm your reservation.",
       });
       // Reset form
       setSelectedDates(undefined);
@@ -69,12 +74,13 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       setGuestName('');
       setGuestEmail('');
       setGuestPhone('');
+      setGuestCount(1);
     },
     onError: (error) => {
       console.log('Booking mutation error:', error);
       toast({
         title: "Booking Failed",
-        description: "Failed to create booking. Please try again or contact support.",
+        description: "There was an issue submitting your booking. Please try again or contact support.",
         variant: "destructive",
       });
     },
@@ -133,6 +139,7 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       guest_name: guestName,
       guest_email: guestEmail,
       guest_phone: guestPhone,
+      status: 'pending'
     };
 
     createBookingMutation.mutate(bookingData);
