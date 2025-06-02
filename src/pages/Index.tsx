@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Search, User, LogOut, Settings, MapPin, Filter } from 'lucide-react';
 import FilterSidebar from '@/components/FilterSidebar';
 import PropertyGrid from '@/components/PropertyGrid';
+import BookingWidget from '@/components/BookingWidget';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,6 +131,13 @@ const Index = () => {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Booking Widget Section */}
+      <section className="py-12 px-4">
+        <div className="container mx-auto">
+          <BookingWidget />
         </div>
       </section>
 
