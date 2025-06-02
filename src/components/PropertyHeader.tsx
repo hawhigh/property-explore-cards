@@ -53,7 +53,10 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
         
         <div className="flex items-center text-gray-600 mb-4">
           <MapPin className="h-5 w-5 mr-2 text-blue-600" />
-          <span className="text-lg">{property.address}, {property.city}, {property.state}, {property.country}</span>
+          <span className="text-lg">
+            {property.address}, {property.city}, {property.state}
+            {property.country && `, ${property.country}`}
+          </span>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-gray-600 mb-6">
@@ -71,7 +74,7 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
           </div>
           <div className="flex items-center">
             <Waves className="h-5 w-5 mr-2 text-blue-600" />
-            <span className="font-medium">Pool {property.poolSize}</span>
+            <span className="font-medium">{property.poolSize}</span>
           </div>
         </div>
 
@@ -87,7 +90,9 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
         </div>
 
         <div className="text-gray-600">
-          <span className="font-medium">Built:</span> {property.yearBuilt} • <span className="font-medium">Renovated:</span> {property.renovated} • <span className="font-medium">Grounds:</span> {property.groundsSize}
+          <span className="font-medium">Built:</span> {property.yearBuilt} • 
+          <span className="font-medium"> Renovated:</span> {property.renovated} • 
+          <span className="font-medium"> Grounds:</span> {property.groundsSize}
         </div>
       </div>
 
