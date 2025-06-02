@@ -25,41 +25,69 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     mutationFn: async (bookingData: any) => {
       console.log('Creating guest booking with data:', bookingData);
       
-      // Check if property ID is a valid UUID, if not, get the actual property ID from database
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
+      // For Villa Lucilla demo, use a default property ID if none exists
       let actualPropertyId = propertyId;
+      
+      // Check if we need to get or create a property for demo purposes
+      const { data: existingProperties, error: propError } = await supabase
+        .from('properties')
+        .select('id')
+        .limit(1);
 
-      if (!isValidUUID) {
-        // Try to get the first available property from the database
-        const { data: properties, error: propError } = await supabase
-          .from('properties')
-          .select('id')
-          .limit(1);
-
-        if (!propError && properties && properties.length > 0) {
-          actualPropertyId = properties[0].id;
-          console.log('Using database property ID:', actualPropertyId);
-        } else {
-          throw new Error('No valid property found in database. Please contact support.');
-        }
+      if (propError) {
+        console.error('Error checking properties:', propError);
       }
 
-      // Create guest booking with user_id explicitly set to null
+      // If no properties exist, create a demo property for Villa Lucilla
+      if (!existingProperties || existingProperties.length === 0) {
+        console.log('No properties found, creating demo property...');
+        const { data: newProperty, error: createError } = await supabase
+          .from('properties')
+          .insert({
+            title: 'Villa Lucilla - Anthorina Gardens Resort',
+            address: 'Konnou street 17, Anthorina Gardens Resort',
+            city: 'Protaras',
+            state: 'Famagusta District',
+            zip_code: '5290',
+            property_type: 'Villa',
+            price: 185,
+            bedrooms: 3,
+            bathrooms: 2,
+            description: 'Beautiful villa in Cyprus',
+            status: 'active'
+          })
+          .select('id')
+          .single();
+
+        if (createError) {
+          console.error('Error creating demo property:', createError);
+          throw new Error('Unable to create booking. Please contact support.');
+        }
+
+        actualPropertyId = newProperty.id;
+        console.log('Created demo property with ID:', actualPropertyId);
+      } else {
+        actualPropertyId = existingProperties[0].id;
+        console.log('Using existing property ID:', actualPropertyId);
+      }
+
+      // Create guest booking
       const { data, error } = await supabase
         .from('bookings')
         .insert({
           ...bookingData,
           property_id: actualPropertyId,
-          user_id: null, // Explicitly set to null for guest bookings
+          user_id: null, // Guest booking
         })
         .select()
         .single();
 
       if (error) {
-        console.log('Booking error:', error);
+        console.error('Booking creation error:', error);
         throw error;
       }
 
+      console.log('Booking created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -77,7 +105,7 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       setGuestCount(1);
     },
     onError: (error) => {
-      console.log('Booking mutation error:', error);
+      console.error('Booking mutation error:', error);
       toast({
         title: "Booking Failed",
         description: "There was an issue submitting your booking. Please try again or contact support.",
