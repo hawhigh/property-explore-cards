@@ -21,6 +21,12 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     setGuestCount,
     specialRequests,
     setSpecialRequests,
+    guestName,
+    setGuestName,
+    guestEmail,
+    setGuestEmail,
+    guestPhone,
+    setGuestPhone,
     createBookingMutation,
     calculateNights,
     calculateTotal,
@@ -72,6 +78,12 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           specialRequests={specialRequests}
           setSpecialRequests={setSpecialRequests}
           unavailableDates={unavailableDates}
+          guestName={guestName}
+          setGuestName={setGuestName}
+          guestEmail={guestEmail}
+          setGuestEmail={setGuestEmail}
+          guestPhone={guestPhone}
+          setGuestPhone={setGuestPhone}
         />
 
         <BookingPricing
@@ -83,7 +95,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
         <BookingButton
           onBooking={handleBooking}
           isPending={createBookingMutation.isPending}
-          isDisabled={!selectedDates?.from || !selectedDates?.to}
+          isDisabled={!selectedDates?.from || !selectedDates?.to || !guestName.trim() || !guestEmail.trim() || !guestPhone.trim()}
         />
 
         <ContactInfo />

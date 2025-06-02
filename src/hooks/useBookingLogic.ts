@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -13,19 +12,26 @@ interface UseBookingLogicProps {
 }
 
 export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicProps) => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
-      console.log('Creating booking with data:', bookingData);
+      console.log('Creating guest booking with data:', bookingData);
+      
+      // For guest bookings, we'll insert directly without user authentication
       const { error } = await supabase
         .from('bookings')
-        .insert(bookingData);
+        .insert({
+          ...bookingData,
+          user_id: null, // No user ID for guest bookings
+        });
 
       if (error) {
         console.log('Booking error:', error);
@@ -38,8 +44,12 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
         title: "Booking Request Submitted",
         description: "Your booking request has been submitted. We'll contact you soon to confirm.",
       });
+      // Reset form
       setSelectedDates(undefined);
       setSpecialRequests('');
+      setGuestName('');
+      setGuestEmail('');
+      setGuestPhone('');
     },
     onError: (error) => {
       console.log('Booking mutation error:', error);
@@ -65,21 +75,21 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
   };
 
   const handleBooking = () => {
-    console.log('Booking attempt - User:', user, 'Dates:', selectedDates);
+    console.log('Guest booking attempt - Dates:', selectedDates, 'Guest:', guestName, guestEmail);
     
-    if (!user) {
+    if (!selectedDates?.from || !selectedDates?.to) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to make a booking.",
+        title: "Select Dates",
+        description: "Please select check-in and check-out dates.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!selectedDates?.from || !selectedDates?.to) {
+    if (!guestName.trim() || !guestEmail.trim() || !guestPhone.trim()) {
       toast({
-        title: "Select Dates",
-        description: "Please select check-in and check-out dates.",
+        title: "Guest Details Required",
+        description: "Please fill in all guest details (name, email, and phone).",
         variant: "destructive",
       });
       return;
@@ -97,12 +107,14 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
 
     const bookingData = {
       property_id: propertyId,
-      user_id: user.id,
       start_date: selectedDates.from.toISOString().split('T')[0],
       end_date: selectedDates.to.toISOString().split('T')[0],
       total_price: calculateTotal(),
       guest_count: guestCount,
       special_requests: specialRequests,
+      guest_name: guestName,
+      guest_email: guestEmail,
+      guest_phone: guestPhone,
     };
 
     createBookingMutation.mutate(bookingData);
@@ -115,6 +127,12 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     setGuestCount,
     specialRequests,
     setSpecialRequests,
+    guestName,
+    setGuestName,
+    guestEmail,
+    setGuestEmail,
+    guestPhone,
+    setGuestPhone,
     createBookingMutation,
     calculateNights,
     calculateTotal,
