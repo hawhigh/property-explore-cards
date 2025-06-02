@@ -25,66 +25,85 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     mutationFn: async (bookingData: any) => {
       console.log('Creating guest booking with data:', bookingData);
       
-      // For Villa Lucilla demo, use a default property ID if none exists
+      // Check if we have a valid property ID
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
       let actualPropertyId = propertyId;
       
-      // Check if we need to get or create a property for demo purposes
-      const { data: existingProperties, error: propError } = await supabase
-        .from('properties')
-        .select('id')
-        .limit(1);
-
-      if (propError) {
-        console.error('Error checking properties:', propError);
-      }
-
-      // If no properties exist, create a demo property for Villa Lucilla
-      if (!existingProperties || existingProperties.length === 0) {
-        console.log('No properties found, creating demo property...');
-        const { data: newProperty, error: createError } = await supabase
+      if (!isValidUUID) {
+        // Create or get a demo property for Villa Lucilla
+        console.log('Invalid property ID, creating/getting demo property...');
+        
+        const { data: existingProperties, error: propError } = await supabase
           .from('properties')
-          .insert({
-            title: 'Villa Lucilla - Anthorina Gardens Resort',
-            address: 'Konnou street 17, Anthorina Gardens Resort',
-            city: 'Protaras',
-            state: 'Famagusta District',
-            zip_code: '5290',
-            property_type: 'Villa',
-            price: 185,
-            bedrooms: 3,
-            bathrooms: 2,
-            description: 'Beautiful villa in Cyprus',
-            status: 'active'
-          })
           .select('id')
-          .single();
+          .eq('title', 'Villa Lucilla - Anthorina Gardens Resort')
+          .limit(1);
 
-        if (createError) {
-          console.error('Error creating demo property:', createError);
-          throw new Error('Unable to create booking. Please contact support.');
+        if (propError) {
+          console.error('Error checking properties:', propError);
         }
 
-        actualPropertyId = newProperty.id;
-        console.log('Created demo property with ID:', actualPropertyId);
-      } else {
-        actualPropertyId = existingProperties[0].id;
-        console.log('Using existing property ID:', actualPropertyId);
+        if (!existingProperties || existingProperties.length === 0) {
+          console.log('Creating demo property for Villa Lucilla...');
+          const { data: newProperty, error: createError } = await supabase
+            .from('properties')
+            .insert({
+              title: 'Villa Lucilla - Anthorina Gardens Resort',
+              address: 'Konnou street 17, Anthorina Gardens Resort',
+              city: 'Protaras',
+              state: 'Famagusta District',
+              zip_code: '5290',
+              property_type: 'Villa',
+              price: 185,
+              bedrooms: 3,
+              bathrooms: 2,
+              description: 'Beautiful villa in Cyprus with stunning sea views and private pool.',
+              status: 'active',
+              images: ['/placeholder.svg'],
+              amenities: ['Pool', 'WiFi', 'Air Conditioning', 'Kitchen', 'Parking']
+            })
+            .select('id')
+            .single();
+
+          if (createError) {
+            console.error('Error creating demo property:', createError);
+            throw new Error('Unable to create booking. Please contact support.');
+          }
+
+          actualPropertyId = newProperty.id;
+          console.log('Created demo property with ID:', actualPropertyId);
+        } else {
+          actualPropertyId = existingProperties[0].id;
+          console.log('Using existing property ID:', actualPropertyId);
+        }
       }
 
-      // For demo purposes, simulate booking creation
-      // In a real app, you'd handle RLS policies properly
-      console.log('Simulating booking creation for guest:', {
-        ...bookingData,
-        property_id: actualPropertyId,
-      });
+      // Create the booking - this will work with our new RLS policy for anonymous inserts
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          property_id: actualPropertyId,
+          start_date: bookingData.start_date,
+          end_date: bookingData.end_date,
+          total_price: bookingData.total_price,
+          guest_count: bookingData.guest_count,
+          special_requests: bookingData.special_requests,
+          guest_name: bookingData.guest_name,
+          guest_email: bookingData.guest_email,
+          guest_phone: bookingData.guest_phone,
+          status: 'pending',
+          user_id: null // Allow anonymous bookings
+        })
+        .select()
+        .single();
 
-      // Return a simulated successful booking response
-      return {
-        id: 'demo-booking-' + Date.now(),
-        ...bookingData,
-        property_id: actualPropertyId,
-        created_at: new Date().toISOString(),
-      };
+      if (bookingError) {
+        console.error('Booking creation error:', bookingError);
+        throw new Error('Failed to create booking. Please try again.');
+      }
+
+      console.log('Booking created successfully:', booking);
+      return booking;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability', propertyId] });
@@ -104,7 +123,7 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       console.error('Booking mutation error:', error);
       toast({
         title: "Booking Failed",
-        description: "There was an issue submitting your booking. Please try again or contact support.",
+        description: error instanceof Error ? error.message : "There was an issue submitting your booking. Please try again or contact support.",
         variant: "destructive",
       });
     },
@@ -163,7 +182,6 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       guest_name: guestName,
       guest_email: guestEmail,
       guest_phone: guestPhone,
-      status: 'pending'
     };
 
     createBookingMutation.mutate(bookingData);

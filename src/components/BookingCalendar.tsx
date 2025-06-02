@@ -36,7 +36,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const { data: availability = [], isLoading: isLoadingAvailability } = useQuery({
     queryKey: ['availability', propertyId],
     queryFn: async () => {
-      // Only fetch availability if we have a valid UUID format property ID
+      // Check if we have a valid UUID format property ID
       const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
       
       if (!isValidUUID) {
