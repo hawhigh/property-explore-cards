@@ -3,15 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, Heart, DollarSign, Eye, TrendingUp } from 'lucide-react';
+import { Home, Calendar, Heart, DollarSign } from 'lucide-react';
 
 const PropertyStats = () => {
   const { user } = useAuth();
 
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ['property-stats', user?.id],
     queryFn: async () => {
       if (!user) return null;
+
+      console.log('Fetching property stats for user:', user.id);
 
       // Get property counts by status
       const { data: properties, error: propertiesError } = await supabase
@@ -19,30 +21,51 @@ const PropertyStats = () => {
         .select('id, status, price')
         .eq('owner_id', user.id);
 
-      if (propertiesError) throw propertiesError;
+      if (propertiesError) {
+        console.error('Error fetching properties:', propertiesError);
+        throw propertiesError;
+      }
 
-      // Get bookings count
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('id, total_price, status')
-        .in('property_id', properties?.map(p => p.id) || []);
+      console.log('Found properties:', properties?.length || 0);
 
-      if (bookingsError) throw bookingsError;
+      // Get bookings count - only if we have properties
+      let bookings = [];
+      if (properties && properties.length > 0) {
+        const { data: bookingsData, error: bookingsError } = await supabase
+          .from('bookings')
+          .select('id, total_price, status')
+          .in('property_id', properties.map(p => p.id));
 
-      // Get favorites count
-      const { data: favorites, error: favoritesError } = await supabase
-        .from('favorites')
-        .select('id')
-        .in('property_id', properties?.map(p => p.id) || []);
+        if (bookingsError) {
+          console.error('Error fetching bookings:', bookingsError);
+          // Don't throw here, just log the error
+        } else {
+          bookings = bookingsData || [];
+        }
+      }
 
-      if (favoritesError) throw favoritesError;
+      // Get favorites count - only if we have properties
+      let favorites = [];
+      if (properties && properties.length > 0) {
+        const { data: favoritesData, error: favoritesError } = await supabase
+          .from('favorites')
+          .select('id')
+          .in('property_id', properties.map(p => p.id));
+
+        if (favoritesError) {
+          console.error('Error fetching favorites:', favoritesError);
+          // Don't throw here, just log the error
+        } else {
+          favorites = favoritesData || [];
+        }
+      }
 
       const activeProperties = properties?.filter(p => p.status === 'active').length || 0;
       const totalBookings = bookings?.length || 0;
       const totalRevenue = bookings?.reduce((sum, b) => sum + Number(b.total_price || 0), 0) || 0;
       const totalFavorites = favorites?.length || 0;
 
-      return {
+      const statsData = {
         activeProperties,
         totalProperties: properties?.length || 0,
         totalBookings,
@@ -51,6 +74,9 @@ const PropertyStats = () => {
         pendingBookings: bookings?.filter(b => b.status === 'pending').length || 0,
         confirmedBookings: bookings?.filter(b => b.status === 'confirmed').length || 0,
       };
+
+      console.log('Calculated stats:', statsData);
+      return statsData;
     },
     enabled: !!user,
   });
@@ -65,7 +91,30 @@ const PropertyStats = () => {
     );
   }
 
-  if (!stats) return null;
+  if (error) {
+    console.error('PropertyStats error:', error);
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 text-sm">Error loading stats</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-gray-600 text-sm">No data available</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
