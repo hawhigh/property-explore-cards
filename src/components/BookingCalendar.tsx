@@ -33,15 +33,26 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     handleBooking,
   } = useBookingLogic({ propertyId, pricePerNight });
 
-  const { data: availability = [] } = useQuery({
+  const { data: availability = [], isLoading: isLoadingAvailability } = useQuery({
     queryKey: ['availability', propertyId],
     queryFn: async () => {
       // Only fetch availability if we have a valid UUID format property ID
       const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
       
       if (!isValidUUID) {
-        console.log('Invalid property ID format, skipping availability query');
-        return [];
+        console.log('Invalid property ID format, returning sample unavailable dates');
+        // Return some sample unavailable dates for demo
+        const today = new Date();
+        const sampleUnavailable = [];
+        for (let i = 10; i < 15; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          sampleUnavailable.push({
+            date: date.toISOString().split('T')[0],
+            available: false
+          });
+        }
+        return sampleUnavailable;
       }
 
       try {
@@ -83,6 +94,12 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
             Minimum 2-night stay • Up to 6 guests
           </div>
         </div>
+
+        {isLoadingAvailability && (
+          <div className="text-center text-sm text-gray-500">
+            Loading availability...
+          </div>
+        )}
 
         <BookingForm
           selectedDates={selectedDates}

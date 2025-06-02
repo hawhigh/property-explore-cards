@@ -37,18 +37,49 @@ const BookingForm = ({
   guestPhone,
   setGuestPhone,
 }: BookingFormProps) => {
+  // Create a function to check if a date is unavailable
+  const isDateUnavailable = (date: Date) => {
+    return unavailableDates.some(unavailableDate => 
+      date.toDateString() === unavailableDate.toDateString()
+    );
+  };
+
+  // Disable past dates and unavailable dates
+  const disabledDates = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today || isDateUnavailable(date);
+  };
+
   return (
     <>
       <div>
         <Label className="text-sm font-medium mb-2 block">Select Dates</Label>
+        <div className="mb-2">
+          <div className="flex items-center gap-4 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+              <span>Unavailable</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-600 rounded"></div>
+              <span>Selected</span>
+            </div>
+          </div>
+        </div>
         <Calendar
           mode="range"
           selected={selectedDates}
           onSelect={setSelectedDates}
-          disabled={unavailableDates}
+          disabled={disabledDates}
           className="rounded-md border w-full"
           numberOfMonths={1}
         />
+        {unavailableDates.length > 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            Red dates are not available for booking
+          </p>
+        )}
       </div>
 
       <div>
