@@ -1,21 +1,24 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BookingWidget from '@/components/BookingWidget';
 import HeroHeader from '@/components/HeroHeader';
-import FeaturedProperty from '@/components/FeaturedProperty';
 import FooterCTA from '@/components/FooterCTA';
-import PropertyGallery from '@/components/PropertyGallery';
 import PropertyHeader from '@/components/PropertyHeader';
 import PropertyDescription from '@/components/PropertyDescription';
 import PropertyAmenities from '@/components/PropertyAmenities';
 import PropertyLocationHighlights from '@/components/PropertyLocationHighlights';
 import PropertyGuestReviews from '@/components/PropertyGuestReviews';
 import BookingCalendar from '@/components/BookingCalendar';
+import EnhancedBookingFlow from '@/components/EnhancedBookingFlow';
+import ImageGalleryLightbox from '@/components/ImageGalleryLightbox';
+import PropertyManagementDashboard from '@/components/PropertyManagementDashboard';
+import NotificationSystem from '@/components/NotificationSystem';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showManagement, setShowManagement] = useState(false);
+  const [showEnhancedBooking, setShowEnhancedBooking] = useState(false);
 
   // Single property data for Villa Lucilla
   const property = {
@@ -60,15 +63,24 @@ const Index = () => {
 
   const pricePerNight = 185;
 
+  if (showManagement) {
+    return <PropertyManagementDashboard />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Hero Header */}
-      <HeroHeader 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-      />
+      {/* Hero Header with Notifications */}
+      <div className="relative">
+        <HeroHeader 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+        />
+        <div className="absolute top-4 right-4">
+          <NotificationSystem />
+        </div>
+      </div>
 
       {/* Hero Section */}
       <section className="relative py-12 md:py-20 px-4 overflow-hidden">
@@ -108,16 +120,45 @@ const Index = () => {
 
             {/* Call to Action */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+                onClick={() => setShowEnhancedBooking(true)}
+              >
                 Book Your Stay
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4 text-lg rounded-full border-2 border-blue-200 hover:border-blue-300">
                 View Gallery
               </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-8 py-4 text-lg rounded-full border-2 border-green-200 hover:border-green-300"
+                onClick={() => setShowManagement(true)}
+              >
+                Manage Property
+              </Button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Enhanced Booking Modal */}
+      {showEnhancedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -top-12 right-0 text-white hover:bg-white/20"
+              onClick={() => setShowEnhancedBooking(false)}
+            >
+              ✕
+            </Button>
+            <EnhancedBookingFlow pricePerNight={pricePerNight} />
+          </div>
+        </div>
+      )}
 
       {/* Booking Widget Section */}
       <section className="py-8 md:py-16 px-4 bg-white/80 backdrop-blur-sm">
@@ -138,8 +179,8 @@ const Index = () => {
       <section className="py-8 md:py-16 px-4">
         <div className="container mx-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Property Gallery */}
-            <PropertyGallery images={property.images} title={property.title} />
+            {/* Enhanced Image Gallery */}
+            <ImageGalleryLightbox images={property.images} title={property.title} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Property Details */}
