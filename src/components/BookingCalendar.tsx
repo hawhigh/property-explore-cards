@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
+import { Calendar as CalendarIcon, Users, Wifi } from 'lucide-react';
 
 interface BookingCalendarProps {
   propertyId: string;
@@ -33,18 +34,25 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
         .select('*')
         .eq('property_id', propertyId);
 
-      if (error) throw error;
+      if (error) {
+        console.log('Error fetching availability:', error);
+        return [];
+      }
       return data;
     },
   });
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
+      console.log('Creating booking with data:', bookingData);
       const { error } = await supabase
         .from('bookings')
         .insert(bookingData);
 
-      if (error) throw error;
+      if (error) {
+        console.log('Booking error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability', propertyId] });
@@ -55,7 +63,8 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
       setSelectedDates({});
       setSpecialRequests('');
     },
-    onError: () => {
+    onError: (error) => {
+      console.log('Booking mutation error:', error);
       toast({
         title: "Booking Failed",
         description: "Failed to create booking. Please try again.",
@@ -64,13 +73,22 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     },
   });
 
-  const calculateTotal = () => {
+  const calculateNights = () => {
     if (!selectedDates.from || !selectedDates.to) return 0;
-    const nights = differenceInDays(selectedDates.to, selectedDates.from);
-    return nights * pricePerNight;
+    return Math.max(1, differenceInDays(selectedDates.to, selectedDates.from));
+  };
+
+  const calculateTotal = () => {
+    const nights = calculateNights();
+    const subtotal = nights * pricePerNight;
+    const cleaningFee = 150;
+    const serviceFee = 120;
+    return subtotal + cleaningFee + serviceFee;
   };
 
   const handleBooking = () => {
+    console.log('Booking attempt - User:', user, 'Dates:', selectedDates);
+    
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -84,6 +102,16 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
       toast({
         title: "Select Dates",
         description: "Please select check-in and check-out dates.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const nights = calculateNights();
+    if (nights < 3) {
+      toast({
+        title: "Minimum Stay Required",
+        description: "Villa Lucilla requires a minimum 3-night stay.",
         variant: "destructive",
       });
       return;
@@ -106,14 +134,25 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     .filter(a => !a.available)
     .map(a => new Date(a.date));
 
+  const nights = calculateNights();
+
   return (
-    <Card>
+    <Card className="sticky top-4 shadow-lg">
       <CardHeader>
         <CardTitle>Book Your Stay</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        <div className="text-center mb-6">
+          <div className="text-3xl font-bold text-blue-600 mb-1">
+            €{pricePerNight}/night
+          </div>
+          <div className="text-sm text-gray-600">
+            Minimum 3-night stay
+          </div>
+        </div>
+
         <div>
-          <Label>Select Dates</Label>
+          <Label className="text-sm font-medium mb-2 block">Select Dates</Label>
           <Calendar
             mode="range"
             selected={selectedDates.from && selectedDates.to ? { from: selectedDates.from, to: selectedDates.to } : undefined}
@@ -124,42 +163,74 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
         </div>
 
         <div>
-          <Label htmlFor="guests">Number of Guests</Label>
-          <Input
-            id="guests"
-            type="number"
-            min="1"
-            value={guestCount}
-            onChange={(e) => setGuestCount(parseInt(e.target.value))}
-          />
+          <Label htmlFor="guests" className="text-sm font-medium mb-2 block">Number of Guests</Label>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-gray-400" />
+            <Input
+              id="guests"
+              type="number"
+              min="1"
+              max="6"
+              value={guestCount}
+              onChange={(e) => setGuestCount(parseInt(e.target.value))}
+              className="flex-1"
+            />
+            <span className="text-sm text-gray-500">max 6</span>
+          </div>
         </div>
 
         <div>
-          <Label htmlFor="requests">Special Requests</Label>
+          <Label htmlFor="requests" className="text-sm font-medium mb-2 block">Special Requests</Label>
           <Textarea
             id="requests"
             value={specialRequests}
             onChange={(e) => setSpecialRequests(e.target.value)}
-            placeholder="Any special requests or notes..."
+            placeholder="Wine tours, private chef, airport transfer..."
+            className="resize-none"
+            rows={3}
           />
         </div>
 
-        {selectedDates.from && selectedDates.to && (
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-2">
-              <span>Total ({differenceInDays(selectedDates.to, selectedDates.from)} nights)</span>
-              <span className="font-bold">${calculateTotal().toLocaleString()}</span>
+        {selectedDates.from && selectedDates.to && nights > 0 && (
+          <div className="border-t pt-4 space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>€{pricePerNight} × {nights} nights</span>
+              <span>€{pricePerNight * nights}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Cleaning fee</span>
+              <span>€150</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Service fee</span>
+              <span>€120</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-3">
+              <span>Total</span>
+              <span>€{calculateTotal()}</span>
             </div>
           </div>
         )}
 
         <Button 
           onClick={handleBooking} 
-          className="w-full"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          size="lg"
           disabled={createBookingMutation.isPending || !selectedDates.from || !selectedDates.to}
         >
-          {createBookingMutation.isPending ? 'Booking...' : 'Book Now'}
+          <CalendarIcon className="h-4 w-4 mr-2" />
+          {createBookingMutation.isPending ? 'Booking...' : 'Reserve Villa Lucilla'}
         </Button>
+
+        <div className="text-center space-y-2">
+          <p className="text-xs text-gray-500">
+            You won't be charged yet
+          </p>
+          <p className="text-xs text-gray-500">
+            <Wifi className="h-3 w-3 inline mr-1" />
+            Free WiFi • Pool & Grounds Access
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

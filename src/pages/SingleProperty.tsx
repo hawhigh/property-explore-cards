@@ -5,7 +5,7 @@ import PropertyGallery from '@/components/PropertyGallery';
 import PropertyDescription from '@/components/PropertyDescription';
 import PropertyAmenities from '@/components/PropertyAmenities';
 import PropertyLocationHighlights from '@/components/PropertyLocationHighlights';
-import PropertyBookingSidebar from '@/components/PropertyBookingSidebar';
+import BookingCalendar from '@/components/BookingCalendar';
 import PropertyGuestReviews from '@/components/PropertyGuestReviews';
 import { usePropertyData } from '@/hooks/usePropertyData';
 
@@ -50,7 +50,10 @@ const SingleProperty = () => {
 
             {/* Booking Sidebar */}
             <div className="lg:col-span-1">
-              <PropertyBookingSidebar pricePerNight={property.pricePerNight} maxGuests={property.maxGuests} />
+              <BookingCalendar 
+                propertyId={property.id} 
+                pricePerNight={property.pricePerNight} 
+              />
             </div>
           </div>
         </div>
