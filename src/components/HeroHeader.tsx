@@ -52,10 +52,6 @@ const HeroHeader = ({ searchQuery, setSearchQuery, showFilters, setShowFilters }
               Filters
             </Button>
             
-            <Button variant="outline" asChild className="rounded-full">
-              <Link to="/single">View Demo</Link>
-            </Button>
-            
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
