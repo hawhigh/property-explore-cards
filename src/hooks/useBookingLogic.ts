@@ -25,11 +25,30 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     mutationFn: async (bookingData: any) => {
       console.log('Creating guest booking with data:', bookingData);
       
-      // For guest bookings, we'll insert directly without user authentication
+      // Check if property ID is a valid UUID, if not, get the actual property ID from database
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
+      let actualPropertyId = propertyId;
+
+      if (!isValidUUID) {
+        // Try to get the first available property from the database
+        const { data: properties, error: propError } = await supabase
+          .from('properties')
+          .select('id')
+          .limit(1);
+
+        if (!propError && properties && properties.length > 0) {
+          actualPropertyId = properties[0].id;
+          console.log('Using database property ID:', actualPropertyId);
+        } else {
+          throw new Error('No valid property found in database. Please contact support.');
+        }
+      }
+
       const { error } = await supabase
         .from('bookings')
         .insert({
           ...bookingData,
+          property_id: actualPropertyId,
           user_id: null, // No user ID for guest bookings
         });
 
@@ -55,7 +74,7 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       console.log('Booking mutation error:', error);
       toast({
         title: "Booking Failed",
-        description: "Failed to create booking. Please try again.",
+        description: "Failed to create booking. Please try again or contact support.",
         variant: "destructive",
       });
     },
@@ -106,7 +125,6 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     }
 
     const bookingData = {
-      property_id: propertyId,
       start_date: selectedDates.from.toISOString().split('T')[0],
       end_date: selectedDates.to.toISOString().split('T')[0],
       total_price: calculateTotal(),

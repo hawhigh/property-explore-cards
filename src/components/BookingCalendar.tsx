@@ -36,22 +36,30 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const { data: availability = [] } = useQuery({
     queryKey: ['availability', propertyId],
     queryFn: async () => {
-      // For now, return empty array since we're using a fallback property ID
-      // In a real implementation, this would fetch availability for the actual property
-      if (propertyId === 'villa-lucilla') {
-        return [];
-      }
+      // Only fetch availability if we have a valid UUID format property ID
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
       
-      const { data, error } = await supabase
-        .from('property_availability')
-        .select('*')
-        .eq('property_id', propertyId);
-
-      if (error) {
-        console.log('Error fetching availability:', error);
+      if (!isValidUUID) {
+        console.log('Invalid property ID format, skipping availability query');
         return [];
       }
-      return data;
+
+      try {
+        const { data, error } = await supabase
+          .from('property_availability')
+          .select('*')
+          .eq('property_id', propertyId);
+
+        if (error) {
+          console.log('Error fetching availability:', error);
+          return [];
+        }
+        
+        return data || [];
+      } catch (err) {
+        console.log('Availability query failed:', err);
+        return [];
+      }
     },
   });
 
