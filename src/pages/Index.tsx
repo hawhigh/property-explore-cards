@@ -10,6 +10,7 @@ import VillaDetailsSection from '@/components/VillaDetailsSection';
 import WhyChooseSection from '@/components/WhyChooseSection';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import EnhancedVillaShowcase from '@/components/EnhancedVillaShowcase';
+import FeaturedProperty from '@/components/FeaturedProperty';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,46 +65,77 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="relative">
-        <HeroHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-        />
-        <div className="absolute top-4 right-4">
-          <NotificationSystem />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-cyan-600/20 rounded-full blur-3xl"></div>
       </div>
 
-      <VillaHeroSection
-        bedrooms={property.bedrooms}
-        maxGuests={property.maxGuests}
-        pricePerNight={pricePerNight}
-        rating={property.rating}
-        onBookingClick={() => setShowEnhancedBooking(true)}
-        onManagementClick={() => setShowManagement(true)}
-      />
+      <div className="relative z-10">
+        {/* Header with improved glass effect */}
+        <div className="relative">
+          <HeroHeader 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+          />
+          <div className="absolute top-4 right-4">
+            <NotificationSystem />
+          </div>
+        </div>
 
-      <EnhancedBookingModal
-        isOpen={showEnhancedBooking}
-        onClose={() => setShowEnhancedBooking(false)}
-        pricePerNight={pricePerNight}
-      />
+        {/* Hero Section with enhanced visual appeal */}
+        <VillaHeroSection
+          bedrooms={property.bedrooms}
+          maxGuests={property.maxGuests}
+          pricePerNight={pricePerNight}
+          rating={property.rating}
+          onBookingClick={() => setShowEnhancedBooking(true)}
+          onManagementClick={() => setShowManagement(true)}
+        />
 
-      <EnhancedVillaShowcase />
+        {/* Enhanced Booking Modal */}
+        <EnhancedBookingModal
+          isOpen={showEnhancedBooking}
+          onClose={() => setShowEnhancedBooking(false)}
+          pricePerNight={pricePerNight}
+        />
 
-      <AvailabilitySection />
-      
-      <VillaDetailsSection 
-        property={property} 
-        pricePerNight={pricePerNight} 
-      />
+        {/* Featured Property Section */}
+        <FeaturedProperty />
 
-      <WhyChooseSection />
+        {/* Villa Showcase with improved spacing */}
+        <div className="py-8">
+          <EnhancedVillaShowcase />
+        </div>
 
-      <FooterCTA />
+        {/* Availability Section with enhanced styling */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-indigo-600/5 to-purple-600/5"></div>
+          <AvailabilitySection />
+        </div>
+        
+        {/* Villa Details with improved layout */}
+        <div className="bg-white/70 backdrop-blur-sm">
+          <VillaDetailsSection 
+            property={property} 
+            pricePerNight={pricePerNight} 
+          />
+        </div>
+
+        {/* Why Choose Section */}
+        <WhyChooseSection />
+
+        {/* Footer CTA with enhanced gradient */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900"></div>
+          <div className="relative">
+            <FooterCTA />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
