@@ -19,8 +19,8 @@ const UserManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users', searchTerm, roleFilter],
@@ -31,7 +31,7 @@ const UserManagement = () => {
         .order('created_at', { ascending: false });
 
       if (roleFilter !== 'all') {
-        query = query.eq('role', roleFilter);
+        query = query.eq('role', roleFilter as UserRole);
       }
 
       if (searchTerm) {
@@ -232,8 +232,8 @@ const UserManagement = () => {
                                   <Label htmlFor="role">Change Role</Label>
                                   <Select
                                     defaultValue={selectedUser.role}
-                                    onValueChange={(role: UserRole) => 
-                                      updateUserRole.mutate({ userId: selectedUser.id, role })
+                                    onValueChange={(role: string) => 
+                                      updateUserRole.mutate({ userId: selectedUser.id, role: role as UserRole })
                                     }
                                   >
                                     <SelectTrigger>

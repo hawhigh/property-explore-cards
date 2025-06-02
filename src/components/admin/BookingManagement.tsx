@@ -13,12 +13,14 @@ import { Calendar, Search, Filter, CheckCircle, XCircle, Clock, Eye } from 'luci
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
+type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
 const BookingManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['admin-bookings', searchTerm, statusFilter],
@@ -33,7 +35,7 @@ const BookingManagement = () => {
         .order('created_at', { ascending: false });
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as BookingStatus);
       }
 
       if (searchTerm) {
@@ -47,7 +49,7 @@ const BookingManagement = () => {
   });
 
   const updateBookingStatus = useMutation({
-    mutationFn: async ({ bookingId, status }: { bookingId: string; status: string }) => {
+    mutationFn: async ({ bookingId, status }: { bookingId: string; status: BookingStatus }) => {
       const { error } = await supabase
         .from('bookings')
         .update({ status })
@@ -248,7 +250,7 @@ const BookingManagement = () => {
                                     size="sm"
                                     onClick={() => updateBookingStatus.mutate({
                                       bookingId: selectedBooking.id,
-                                      status: 'confirmed'
+                                      status: 'confirmed' as BookingStatus
                                     })}
                                     disabled={selectedBooking.status === 'confirmed'}
                                   >
@@ -259,7 +261,7 @@ const BookingManagement = () => {
                                     size="sm"
                                     onClick={() => updateBookingStatus.mutate({
                                       bookingId: selectedBooking.id,
-                                      status: 'cancelled'
+                                      status: 'cancelled' as BookingStatus
                                     })}
                                     disabled={selectedBooking.status === 'cancelled'}
                                   >
