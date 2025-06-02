@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,9 +121,16 @@ const UserProfile = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             User Profile
-            <Badge variant={profile?.role === 'admin' ? 'default' : 'secondary'}>
-              {profile?.role || 'user'}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant={profile?.role === 'admin' ? 'default' : 'secondary'}>
+                {profile?.role || 'user'}
+              </Badge>
+              {profile?.role === 'admin' && (
+                <Badge variant="destructive" className="text-xs">
+                  Property Owner Access
+                </Badge>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -132,6 +138,7 @@ const UserProfile = () => {
             <TabsList>
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="owner">Owner Hub</TabsTrigger>
             </TabsList>
             
             <TabsContent value="profile">
@@ -208,6 +215,37 @@ const UserProfile = () => {
                 >
                   Sign Out
                 </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="owner">
+              <div className="space-y-4">
+                <div className="border border-blue-200 bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-800 mb-2">Property Owner Dashboard</h3>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Access your comprehensive property management dashboard with analytics, booking management, and listing tools.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Go to Owner Dashboard
+                  </Button>
+                </div>
+                
+                <div className="border border-green-200 bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-green-800 mb-2">Quick Property Management</h3>
+                  <p className="text-sm text-green-700 mb-3">
+                    Directly manage your property listings, add new properties, and handle bookings.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/property-management'}
+                    variant="outline" 
+                    className="text-green-700 border-green-300"
+                  >
+                    Manage Properties
+                  </Button>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

@@ -17,6 +17,10 @@ import Header from '@/components/Header';
 import PropertyStats from '@/components/PropertyStats';
 import QuickActions from '@/components/QuickActions';
 import RecentActivity from '@/components/RecentActivity';
+import PropertyOwnerDashboard from '@/components/property-management/PropertyOwnerDashboard';
+import PropertyPerformanceChart from '@/components/property-management/PropertyPerformanceChart';
+import PropertyListingManagement from '@/components/property-management/PropertyListingManagement';
+import BookingManagement from '@/components/property-management/BookingManagement';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -61,25 +65,47 @@ const Dashboard = () => {
                 <p className="text-red-600 font-semibold mt-1">Administrator Access</p>
               )}
             </div>
-            <UserProfile />
           </div>
 
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-5 lg:w-[500px]' : 'md:grid-cols-4 lg:w-[400px]'}`}>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
+          <Tabs defaultValue="owner-dashboard" className="w-full">
+            <TabsList className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-7 lg:w-[700px]' : 'md:grid-cols-6 lg:w-[600px]'}`}>
+              <TabsTrigger value="owner-dashboard">Owner Hub</TabsTrigger>
+              <TabsTrigger value="listings">My Listings</TabsTrigger>
+              <TabsTrigger value="booking-mgmt">Bookings</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
               <TabsTrigger value="favorites">Favorites</TabsTrigger>
               {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
             </TabsList>
 
-            <TabsContent value="overview" className="mt-6">
+            <TabsContent value="owner-dashboard" className="mt-6">
+              <div className="space-y-8">
+                {/* Property Owner Dashboard */}
+                <PropertyOwnerDashboard />
+                
+                {/* Performance Charts */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold">Performance Analytics</h3>
+                  <PropertyPerformanceChart />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="listings" className="mt-6">
+              <PropertyListingManagement />
+            </TabsContent>
+
+            <TabsContent value="booking-mgmt" className="mt-6">
+              <BookingManagement />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="mt-6">
               <div className="space-y-8">
                 {/* Property Statistics */}
                 <PropertyStats />
 
-                {/* Quick Actions */}
-                <QuickActions isAdmin={isAdmin} />
+                {/* Performance Charts */}
+                <PropertyPerformanceChart />
 
                 {/* Recent Activity */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -144,10 +170,6 @@ const Dashboard = () => {
                   <MyProperties />
                 </CardContent>
               </Card>
-            </TabsContent>
-            
-            <TabsContent value="bookings">
-              <MyBookings />
             </TabsContent>
             
             <TabsContent value="favorites">
