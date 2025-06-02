@@ -54,8 +54,8 @@ const SingleProperty = () => {
     );
   }
 
-  // Calculate price per night from total price (assuming monthly price)
-  const pricePerNight = property.price ? Math.round(property.price / 30) : 650;
+  // Calculate price per night from property data
+  const pricePerNight = property.pricePerNight || (property.price ? Math.round(property.price / 7) : 185);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,21 +72,21 @@ const SingleProperty = () => {
               {/* Header Info */}
               <PropertyHeader property={{
                 title: property.title,
-                propertyType: property.property_type || 'Villa',
+                propertyType: property.property_type || 'Resort Villa',
                 address: property.address,
                 city: property.city,
                 state: property.state,
-                country: 'Greece', // Default fallback
+                country: property.country || 'Cyprus',
                 bedrooms: property.bedrooms || 3,
                 bathrooms: property.bathrooms || 2,
-                maxGuests: 6, // Default fallback
-                poolSize: 'Resort Pool', // Default fallback
-                price: property.price || 1850000,
-                rating: 4.8, // Default fallback
-                reviews: 89, // Default fallback
+                maxGuests: property.maxGuests || 6,
+                poolSize: property.poolSize || 'Private Pool',
+                price: property.price || 1850,
+                rating: property.rating || 4.8,
+                reviews: property.reviews || 89,
                 yearBuilt: property.year_built || 2010,
-                renovated: 2022, // Default fallback
-                groundsSize: 'Resort Grounds' // Default fallback
+                renovated: property.renovated || 2022,
+                groundsSize: property.groundsSize || 'Resort Grounds'
               }} />
 
               {/* Description */}

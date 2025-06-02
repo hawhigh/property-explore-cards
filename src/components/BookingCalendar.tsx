@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
-import { Calendar as CalendarIcon, Users, Wifi } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, Wifi, Phone, Mail } from 'lucide-react';
 
 interface BookingCalendarProps {
   propertyId: string;
@@ -57,8 +57,8 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability', propertyId] });
       toast({
-        title: "Booking Created",
-        description: "Your booking request has been submitted successfully.",
+        title: "Booking Request Submitted",
+        description: "Your booking request has been submitted. We'll contact you soon to confirm.",
       });
       setSelectedDates({});
       setSpecialRequests('');
@@ -81,8 +81,8 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const calculateTotal = () => {
     const nights = calculateNights();
     const subtotal = nights * pricePerNight;
-    const cleaningFee = 150;
-    const serviceFee = 120;
+    const cleaningFee = 50;
+    const serviceFee = 25;
     return subtotal + cleaningFee + serviceFee;
   };
 
@@ -108,10 +108,10 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     }
 
     const nights = calculateNights();
-    if (nights < 3) {
+    if (nights < 2) {
       toast({
         title: "Minimum Stay Required",
-        description: "Villa Lucilla requires a minimum 3-night stay.",
+        description: "Villa Lucilla requires a minimum 2-night stay.",
         variant: "destructive",
       });
       return;
@@ -139,7 +139,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   return (
     <Card className="sticky top-4 shadow-lg">
       <CardHeader>
-        <CardTitle>Book Your Stay</CardTitle>
+        <CardTitle>Book Your Stay at Villa Lucilla</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center mb-6">
@@ -147,7 +147,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
             €{pricePerNight}/night
           </div>
           <div className="text-sm text-gray-600">
-            Minimum 3-night stay
+            Minimum 2-night stay • Up to 6 guests
           </div>
         </div>
 
@@ -185,7 +185,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
             id="requests"
             value={specialRequests}
             onChange={(e) => setSpecialRequests(e.target.value)}
-            placeholder="Wine tours, private chef, airport transfer..."
+            placeholder="Airport transfer, early check-in, special arrangements..."
             className="resize-none"
             rows={3}
           />
@@ -199,11 +199,11 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
             </div>
             <div className="flex justify-between text-sm">
               <span>Cleaning fee</span>
-              <span>€150</span>
+              <span>€50</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Service fee</span>
-              <span>€120</span>
+              <span>€25</span>
             </div>
             <div className="flex justify-between font-bold text-lg border-t pt-3">
               <span>Total</span>
@@ -219,16 +219,26 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           disabled={createBookingMutation.isPending || !selectedDates.from || !selectedDates.to}
         >
           <CalendarIcon className="h-4 w-4 mr-2" />
-          {createBookingMutation.isPending ? 'Booking...' : 'Reserve Villa Lucilla'}
+          {createBookingMutation.isPending ? 'Submitting...' : 'Book Villa Lucilla'}
         </Button>
 
         <div className="text-center space-y-2">
           <p className="text-xs text-gray-500">
-            You won't be charged yet
+            Direct booking confirmation
           </p>
+          <div className="text-xs text-gray-500 space-y-1">
+            <div className="flex items-center justify-center gap-1">
+              <Phone className="h-3 w-3" />
+              <span>+357 96 555 154</span>
+            </div>
+            <div className="flex items-center justify-center gap-1">
+              <Mail className="h-3 w-3" />
+              <span>booking@villalucilla.eu</span>
+            </div>
+          </div>
           <p className="text-xs text-gray-500">
             <Wifi className="h-3 w-3 inline mr-1" />
-            Free WiFi • Pool & Grounds Access
+            Free WiFi • Private Pool • Beach Access
           </p>
         </div>
       </CardContent>
