@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users, Home, Calendar, Star, Settings, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+type UserRole = 'user' | 'agent' | 'admin';
+
 const AdminPanel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -112,7 +114,7 @@ const AdminPanel = () => {
 
   // Update user role mutation
   const updateUserRole = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+    mutationFn: async ({ userId, role }: { userId: string; role: UserRole }) => {
       const { error } = await supabase
         .from('profiles')
         .update({ role })
@@ -295,7 +297,7 @@ const AdminPanel = () => {
                                 <Label htmlFor="role">Role</Label>
                                 <Select
                                   defaultValue={user.role}
-                                  onValueChange={(role) => 
+                                  onValueChange={(role: UserRole) => 
                                     updateUserRole.mutate({ userId: user.id, role })
                                   }
                                 >
