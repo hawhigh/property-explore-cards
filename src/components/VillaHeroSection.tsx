@@ -16,7 +16,9 @@ const VillaHeroSection = ({
   bedrooms, 
   maxGuests, 
   pricePerNight, 
-  rating 
+  rating,
+  onBookingClick,
+  onManagementClick
 }: VillaHeroSectionProps) => {
   const { t } = useLanguage();
 
