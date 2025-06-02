@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { Calendar as CalendarIcon, Users, Wifi, Phone, Mail } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 
 interface BookingCalendarProps {
   propertyId: string;
@@ -22,7 +23,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedDates, setSelectedDates] = useState<{ from?: Date; to?: Date }>({});
+  const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(1);
   const [specialRequests, setSpecialRequests] = useState('');
 
@@ -60,7 +61,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
         title: "Booking Request Submitted",
         description: "Your booking request has been submitted. We'll contact you soon to confirm.",
       });
-      setSelectedDates({});
+      setSelectedDates(undefined);
       setSpecialRequests('');
     },
     onError: (error) => {
@@ -74,7 +75,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   });
 
   const calculateNights = () => {
-    if (!selectedDates.from || !selectedDates.to) return 0;
+    if (!selectedDates?.from || !selectedDates?.to) return 0;
     return Math.max(1, differenceInDays(selectedDates.to, selectedDates.from));
   };
 
@@ -98,7 +99,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
       return;
     }
 
-    if (!selectedDates.from || !selectedDates.to) {
+    if (!selectedDates?.from || !selectedDates?.to) {
       toast({
         title: "Select Dates",
         description: "Please select check-in and check-out dates.",
@@ -155,10 +156,11 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           <Label className="text-sm font-medium mb-2 block">Select Dates</Label>
           <Calendar
             mode="range"
-            selected={selectedDates.from && selectedDates.to ? { from: selectedDates.from, to: selectedDates.to } : undefined}
-            onSelect={(range) => setSelectedDates(range || {})}
+            selected={selectedDates}
+            onSelect={setSelectedDates}
             disabled={unavailableDates}
-            className="rounded-md border"
+            className="rounded-md border w-full"
+            numberOfMonths={1}
           />
         </div>
 
@@ -191,7 +193,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           />
         </div>
 
-        {selectedDates.from && selectedDates.to && nights > 0 && (
+        {selectedDates?.from && selectedDates?.to && nights > 0 && (
           <div className="border-t pt-4 space-y-3">
             <div className="flex justify-between text-sm">
               <span>€{pricePerNight} × {nights} nights</span>
@@ -216,7 +218,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           onClick={handleBooking} 
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
           size="lg"
-          disabled={createBookingMutation.isPending || !selectedDates.from || !selectedDates.to}
+          disabled={createBookingMutation.isPending || !selectedDates?.from || !selectedDates?.to}
         >
           <CalendarIcon className="h-4 w-4 mr-2" />
           {createBookingMutation.isPending ? 'Submitting...' : 'Book Villa Lucilla'}
