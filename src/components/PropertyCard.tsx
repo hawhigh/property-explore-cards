@@ -37,7 +37,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
       {/* Image */}
       <div className="relative overflow-hidden h-48">
         <img
-          src={property.images[0]}
+          src={property.images?.[0] || '/placeholder.svg'}
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
@@ -67,22 +67,24 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
           <div className="flex items-center">
             <Home className="h-4 w-4 mr-1" />
-            {property.bedrooms} beds
+            {property.bedrooms || 0} beds
           </div>
           <div className="flex items-center">
             <Bath className="h-4 w-4 mr-1" />
-            {property.bathrooms} baths
+            {property.bathrooms || 0} baths
           </div>
-          <span>{property.sqft.toLocaleString()} sqft</span>
+          {property.sqft && (
+            <span>{property.sqft.toLocaleString()} sqft</span>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-1">
-          {property.amenities.slice(0, 3).map((amenity) => (
+          {property.amenities?.slice(0, 3).map((amenity) => (
             <Badge key={amenity} variant="outline" className="text-xs">
               {amenity}
             </Badge>
           ))}
-          {property.amenities.length > 3 && (
+          {property.amenities && property.amenities.length > 3 && (
             <Badge variant="outline" className="text-xs">
               +{property.amenities.length - 3} more
             </Badge>
