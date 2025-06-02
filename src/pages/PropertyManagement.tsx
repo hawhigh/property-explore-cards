@@ -118,8 +118,7 @@ const PropertyManagement = () => {
               <PropertyManagementCard
                 key={property.id}
                 property={property}
-                onEdit={setEditingProperty}
-                onUpdate={refetch}
+                onPropertyUpdate={refetch}
               />
             ))}
           </div>
