@@ -46,6 +46,9 @@ const Index = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <Button variant="outline" asChild>
+                <Link to="/single">View Demo</Link>
+              </Button>
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
