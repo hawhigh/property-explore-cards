@@ -3,10 +3,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type PropertyStatus = Database['public']['Enums']['property_status'];
 
 interface PropertyFilters {
   search?: string;
-  status?: string;
+  status?: PropertyStatus;
   propertyType?: string;
   priceMin?: number;
   priceMax?: number;
