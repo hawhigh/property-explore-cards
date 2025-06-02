@@ -25,7 +25,7 @@ interface Property {
   year_built: number;
   amenities: string[];
   images: string[];
-  status: string;
+  status: 'active' | 'pending' | 'sold' | 'rented';
 }
 
 interface EditPropertyModalProps {
@@ -53,7 +53,7 @@ const EditPropertyModal = ({ property, isOpen, onClose, onSuccess }: EditPropert
     year_built: '',
     amenities: '',
     images: '',
-    status: '',
+    status: 'active' as 'active' | 'pending' | 'sold' | 'rented',
   });
 
   useEffect(() => {
@@ -263,7 +263,7 @@ const EditPropertyModal = ({ property, isOpen, onClose, onSuccess }: EditPropert
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+              <Select value={formData.status} onValueChange={(value: 'active' | 'pending' | 'sold' | 'rented') => setFormData({...formData, status: value})}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

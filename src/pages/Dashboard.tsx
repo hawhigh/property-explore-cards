@@ -1,25 +1,20 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Home, Calendar, Heart, Plus } from 'lucide-react';
 import UserProfile from '@/components/UserProfile';
 import MyBookings from '@/components/MyBookings';
 import MyFavorites from '@/components/MyFavorites';
 import MyProperties from '@/components/MyProperties';
 import AdminPanel from '@/components/AdminPanel';
 import Header from '@/components/Header';
-import Card from '@/components/Card';
-import CardContent from '@/components/CardContent';
-import CardHeader from '@/components/CardHeader';
-import CardTitle from '@/components/CardTitle';
-import Button from '@/components/Button';
-import Home from '@/components/icons/Home';
-import Calendar from '@/components/icons/Calendar';
-import Heart from '@/components/icons/Heart';
-import Plus from '@/components/icons/Plus';
 
 const Dashboard = () => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -38,20 +33,17 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-2">Welcome back, {profile?.full_name || 'User'}!</p>
+              <p className="text-gray-600 mt-2">Welcome back, {user?.email || 'User'}!</p>
             </div>
             <UserProfile />
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid grid-cols-1 md:grid-cols-5 lg:w-[500px]">
+            <TabsList className="grid grid-cols-1 md:grid-cols-4 lg:w-[400px]">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="bookings">Bookings</TabsTrigger>
               <TabsTrigger value="favorites">Favorites</TabsTrigger>
-              {profile?.role === 'admin' && (
-                <TabsTrigger value="admin">Admin</TabsTrigger>
-              )}
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
@@ -150,10 +142,6 @@ const Dashboard = () => {
             
             <TabsContent value="favorites">
               <MyFavorites />
-            </TabsContent>
-            
-            <TabsContent value="admin">
-              <AdminPanel />
             </TabsContent>
           </Tabs>
         </div>
