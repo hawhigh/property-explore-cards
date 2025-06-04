@@ -4,6 +4,7 @@ import { useSecureAuth } from '@/hooks/useSecureAuth';
 import SecureAdminPanel from '@/components/SecureAdminPanel';
 import UserManagement from '@/components/admin/UserManagement';
 import PropertyOwnerManagement from '@/components/admin/PropertyOwnerManagement';
+import ContentImageManagement from '@/components/admin/ContentImageManagement';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Header from '@/components/Header';
 
@@ -27,10 +28,11 @@ const SimplifiedAdminDashboard = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="properties">Property Owners</TabsTrigger>
+              <TabsTrigger value="content">Content & Images</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -44,6 +46,10 @@ const SimplifiedAdminDashboard = () => {
 
             <TabsContent value="properties" className="mt-6">
               <PropertyOwnerManagement />
+            </TabsContent>
+
+            <TabsContent value="content" className="mt-6">
+              <ContentImageManagement />
             </TabsContent>
 
             <TabsContent value="settings" className="mt-6">
