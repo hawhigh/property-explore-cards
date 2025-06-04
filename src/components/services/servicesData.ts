@@ -11,75 +11,48 @@ export interface Service {
 
 export const services: Service[] = [
   {
-    id: 'airport-transfer',
-    name: 'Airport Transfer',
-    description: 'Private transfer from/to Larnaca Airport',
-    price: 75,
-    unit: 'per transfer',
-    category: 'Transport',
-    icon: '🚗'
+    id: 'diving-excursion',
+    name: 'Diving Adventure',
+    description: 'Professional diving experience with certified instructors',
+    price: 120,
+    unit: 'per person',
+    category: 'Water Activities',
+    icon: '🤿'
+  },
+  {
+    id: 'guided-tour',
+    name: 'Cyprus Cultural Tour',
+    description: 'Full-day guided tour of Cyprus historical sites',
+    price: 85,
+    unit: 'per person',
+    category: 'Tours',
+    icon: '🏛️'
   },
   {
     id: 'car-rental',
-    name: 'Car Rental',
-    description: 'Economy car rental with insurance included',
-    price: 35,
+    name: 'Premium Car Rental',
+    description: 'Luxury vehicle rental with full insurance',
+    price: 65,
     unit: 'per day',
-    category: 'Transport',
-    icon: '🚙'
+    category: 'Rental',
+    icon: '🚗'
   },
   {
-    id: 'cleaning-service',
-    name: 'Extra Cleaning',
-    description: 'Additional mid-stay cleaning service',
-    price: 60,
-    unit: 'per service',
-    category: 'Housekeeping',
-    icon: '🧹'
-  },
-  {
-    id: 'grocery-delivery',
-    name: 'Grocery Pre-Stocking',
-    description: 'Essential groceries delivered before arrival',
-    price: 45,
-    unit: 'per package',
-    category: 'Convenience',
-    icon: '🛒'
-  },
-  {
-    id: 'chef-service',
-    name: 'Private Chef',
-    description: 'Professional chef for dinner preparation',
+    id: 'water-sports',
+    name: 'Water Sports Package',
+    description: 'Jet ski, parasailing, and banana boat adventures',
     price: 150,
-    unit: 'per evening',
-    category: 'Dining',
-    icon: '👨‍🍳'
+    unit: 'per package',
+    category: 'Water Activities',
+    icon: '🏄‍♂️'
   },
   {
-    id: 'spa-service',
-    name: 'In-Villa Spa',
-    description: 'Relaxing massage and spa treatments',
-    price: 120,
+    id: 'hotel-spa',
+    name: 'Luxury Hotel Spa',
+    description: 'Premium spa treatments at nearby luxury hotels',
+    price: 180,
     unit: 'per session',
-    category: 'Wellness',
-    icon: '💆‍♀️'
-  },
-  {
-    id: 'boat-trip',
-    name: 'Boat Excursion',
-    description: 'Half-day boat trip around Cyprus coast',
-    price: 200,
-    unit: 'per person',
-    category: 'Activities',
-    icon: '⛵'
-  },
-  {
-    id: 'babysitting',
-    name: 'Babysitting Service',
-    description: 'Professional childcare service',
-    price: 25,
-    unit: 'per hour',
-    category: 'Family',
-    icon: '👶'
+    category: 'Hotel Services',
+    icon: '🏨'
   }
 ];

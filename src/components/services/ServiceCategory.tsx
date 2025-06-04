@@ -20,13 +20,15 @@ interface ServiceCategoryProps {
 
 const ServiceCategory = ({ category, services, selectedServices, onUpdateQuantity }: ServiceCategoryProps) => {
   return (
-    <div className="mb-12">
-      <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-        <span className="w-8 h-1 bg-blue-500 rounded"></span>
-        {category}
-      </h3>
+    <div className="h-full">
+      {category && (
+        <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <span className="w-8 h-1 bg-blue-500 rounded"></span>
+          {category}
+        </h3>
+      )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="h-full">
         {services.map(service => (
           <ServiceCard
             key={service.id}
