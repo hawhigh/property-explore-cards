@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Play, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -9,192 +8,136 @@ interface VillaGallerySectionProps {
 }
 
 const VillaGallerySection = ({ images }: VillaGallerySectionProps) => {
-  const [currentImage, setCurrentImage] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categories = ['All', 'Exterior', 'Interior', 'Pool', 'Bedrooms', 'Kitchen'];
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length);
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  const previousImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const toggleAutoplay = () => {
-    setIsAutoplay(!isAutoplay);
+    setIsPlaying(!isPlaying);
   };
 
   // Auto-advance images when autoplay is on
   React.useEffect(() => {
-    if (isAutoplay) {
+    if (isPlaying) {
       const interval = setInterval(nextImage, 3000);
       return () => clearInterval(interval);
     }
-  }, [isAutoplay]);
-
-  const imageCategories = [
-    { name: 'Exterior', images: images.slice(0, 3) },
-    { name: 'Interior', images: images.slice(3, 6) },
-    { name: 'Pool Area', images: images.slice(6, 8) }
-  ];
+  }, [isPlaying]);
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30 relative overflow-hidden">
+    <section className="py-20 px-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-20 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-20 w-80 h-80 bg-gradient-to-tl from-pink-200/20 to-orange-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/3 left-10 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-10 w-80 h-80 bg-gradient-to-tl from-pink-200/20 to-orange-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="container mx-auto relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <Badge className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-6 py-3 text-lg mb-6 animate-fade-in">
-            📸 Visual Tour
+            📸 Villa Gallery
           </Badge>
           
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight animate-fade-in delay-200">
-            Villa Lucilla
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight animate-fade-in delay-200">
+            Discover Your
             <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Photo Gallery
+              Dream Villa
             </span>
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-            Take a virtual tour of your luxury Cyprus getaway and discover every stunning detail
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed animate-fade-in delay-300">
+            Take a visual journey through Villa Lucilla's stunning spaces, from the luxurious interiors 
+            to the breathtaking outdoor areas with private pool and Mediterranean views.
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto">
-          {/* Main Image Display */}
-          <div className="relative mb-8 group">
-            <div className="aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl bg-gray-100">
-              <img
-                src={images[currentImage]}
-                alt={`Villa Lucilla - Image ${currentImage + 1}`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              
-              {/* Gradient overlays for better button visibility */}
-              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black/30 to-transparent pointer-events-none"></div>
-              <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black/30 to-transparent pointer-events-none"></div>
-            </div>
-            
-            {/* Navigation Controls */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map((category) => (
             <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-xl backdrop-blur-sm w-14 h-14 rounded-full transition-all hover:scale-110"
-              onClick={prevImage}
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-6 py-3 rounded-full transition-all duration-300 ${
+                selectedCategory === category
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
+                  : 'hover:bg-blue-50 hover:border-blue-300'
+              }`}
             >
-              <ChevronLeft className="h-7 w-7 text-gray-700" />
+              {category}
+            </Button>
+          ))}
+        </div>
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-2xl bg-white">
+            <img
+              src={images[currentImageIndex]}
+              alt={`Villa Lucilla - Image ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover transition-all duration-500"
+            />
+            
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            
+            <Button
+              onClick={previousImage}
+              variant="outline"
+              size="icon"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white border-0 shadow-lg"
+            >
+              <ChevronLeft className="h-6 w-6" />
             </Button>
             
             <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-xl backdrop-blur-sm w-14 h-14 rounded-full transition-all hover:scale-110"
               onClick={nextImage}
+              variant="outline"
+              size="icon"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white border-0 shadow-lg"
             >
-              <ChevronRight className="h-7 w-7 text-gray-700" />
+              <ChevronRight className="h-6 w-6" />
             </Button>
-
-            {/* Top Controls */}
-            <div className="absolute top-6 right-6 flex gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm w-12 h-12 rounded-full transition-all hover:scale-110"
-                onClick={toggleAutoplay}
-              >
-                <Play className={`h-5 w-5 text-gray-700 ${isAutoplay ? 'fill-current' : ''}`} />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm w-12 h-12 rounded-full transition-all hover:scale-110"
-              >
-                <Maximize2 className="h-5 w-5 text-gray-700" />
-              </Button>
-            </div>
-
-            {/* Image Counter & Category */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-              <div className="bg-black/70 text-white px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-                {currentImage + 1} / {images.length}
-              </div>
-              <div className="bg-white/90 text-gray-700 px-4 py-2 rounded-full text-sm backdrop-blur-sm font-medium">
-                <ImageIcon className="inline h-4 w-4 mr-1" />
-                Premium Gallery
-              </div>
+            
+            <Button
+              onClick={toggleAutoplay}
+              variant="outline"
+              size="icon"
+              className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white border-0 shadow-lg"
+            >
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
+            
+            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium">
+              {currentImageIndex + 1} / {images.length}
             </div>
           </div>
-
-          {/* Category Tabs */}
-          <div className="flex justify-center gap-4 mb-8">
-            {imageCategories.map((category, index) => (
-              <Button
-                key={category.name}
-                variant="outline"
-                className="rounded-full px-6 py-2 bg-white/80 hover:bg-white border-gray-200 hover:border-blue-300 transition-all"
-                onClick={() => setCurrentImage(index * 3)}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-
-          {/* Thumbnail Grid */}
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+          
+          <div className="flex justify-center gap-3 mt-8 flex-wrap">
             {images.map((image, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentImage(index)}
-                className={`group relative aspect-square rounded-xl overflow-hidden transition-all duration-300 ${
-                  currentImage === index 
-                    ? 'ring-4 ring-blue-500 ring-offset-2 scale-105 shadow-lg' 
-                    : 'hover:opacity-80 hover:scale-105 shadow-md hover:shadow-lg'
+                onClick={() => setCurrentImageIndex(index)}
+                className={`relative w-20 h-16 rounded-lg overflow-hidden transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? 'ring-4 ring-blue-500 scale-110 shadow-lg'
+                    : 'opacity-70 hover:opacity-100 hover:scale-105'
                 }`}
               >
                 <img
                   src={image}
-                  alt={`Villa Lucilla thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
                 />
-                
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
-                
-                {/* Active indicator */}
-                {currentImage === index && (
-                  <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <Play className="h-4 w-4 text-white fill-current" />
-                    </div>
-                  </div>
-                )}
               </button>
             ))}
-          </div>
-
-          {/* Gallery Stats */}
-          <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-8 bg-white/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{images.length}</div>
-                <div className="text-sm text-gray-600">Photos</div>
-              </div>
-              <div className="w-px h-8 bg-gray-300"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">4K</div>
-                <div className="text-sm text-gray-600">Quality</div>
-              </div>
-              <div className="w-px h-8 bg-gray-300"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">360°</div>
-                <div className="text-sm text-gray-600">Views</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
