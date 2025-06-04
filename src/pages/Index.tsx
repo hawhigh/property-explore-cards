@@ -12,6 +12,8 @@ import VillaGallerySection from '@/components/VillaGallerySection';
 import AdditionalServicesSection from '@/components/AdditionalServicesSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import LocationSection from '@/components/LocationSection';
+import VillaFeaturesSection from '@/components/VillaFeaturesSection';
+import SpecialOffersSection from '@/components/SpecialOffersSection';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,14 +56,17 @@ const Index = () => {
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1444201983204-c43cbd584d93?w=800&h=600&fit=crop'
     ]
   };
 
   const pricePerNight = 185;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header */}
       <div className="relative">
         <HeroHeader 
@@ -70,7 +75,7 @@ const Index = () => {
           showFilters={showFilters}
           setShowFilters={setShowFilters}
         />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-50">
           <NotificationSystem />
         </div>
       </div>
@@ -93,11 +98,19 @@ const Index = () => {
       />
 
       {/* Villa Gallery */}
-      <VillaGallerySection images={property.images} />
+      <section id="villa-gallery">
+        <VillaGallerySection images={property.images} />
+      </section>
+
+      {/* Special Offers */}
+      <SpecialOffersSection />
 
       {/* Availability Section */}
       <AvailabilitySection />
       
+      {/* Villa Features */}
+      <VillaFeaturesSection />
+
       {/* Villa Details */}
       <VillaDetailsSection 
         property={property} 
