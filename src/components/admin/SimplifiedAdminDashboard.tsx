@@ -5,6 +5,8 @@ import SecureAdminPanel from '@/components/SecureAdminPanel';
 import UserManagement from '@/components/admin/UserManagement';
 import PropertyOwnerManagement from '@/components/admin/PropertyOwnerManagement';
 import ContentImageManagement from '@/components/admin/ContentImageManagement';
+import EmailManagement from '@/components/admin/EmailManagement';
+import SalesAnalytics from '@/components/admin/SalesAnalytics';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Header from '@/components/Header';
 
@@ -28,8 +30,10 @@ const SimplifiedAdminDashboard = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="analytics">Sales & Analytics</TabsTrigger>
+              <TabsTrigger value="emails">Email Management</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="properties">Property Owners</TabsTrigger>
               <TabsTrigger value="content">Content & Images</TabsTrigger>
@@ -38,6 +42,14 @@ const SimplifiedAdminDashboard = () => {
 
             <TabsContent value="overview" className="mt-6">
               <SecureAdminPanel />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="mt-6">
+              <SalesAnalytics />
+            </TabsContent>
+
+            <TabsContent value="emails" className="mt-6">
+              <EmailManagement />
             </TabsContent>
 
             <TabsContent value="users" className="mt-6">
