@@ -2,20 +2,20 @@
 import { useState } from 'react';
 import HeroHeader from '@/components/HeroHeader';
 import FooterCTA from '@/components/FooterCTA';
-import PropertyManagementDashboard from '@/components/PropertyManagementDashboard';
 import NotificationSystem from '@/components/NotificationSystem';
 import VillaHeroSection from '@/components/VillaHeroSection';
 import AvailabilitySection from '@/components/AvailabilitySection';
 import VillaDetailsSection from '@/components/VillaDetailsSection';
 import WhyChooseSection from '@/components/WhyChooseSection';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import EnhancedVillaShowcase from '@/components/EnhancedVillaShowcase';
-import FeaturedProperty from '@/components/FeaturedProperty';
+import VillaGallerySection from '@/components/VillaGallerySection';
+import AdditionalServicesSection from '@/components/AdditionalServicesSection';
+import TestimonialsSection from '@/components/TestimonialsSection';
+import LocationSection from '@/components/LocationSection';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [showManagement, setShowManagement] = useState(false);
   const [showEnhancedBooking, setShowEnhancedBooking] = useState(false);
 
   const property = {
@@ -36,7 +36,7 @@ const Index = () => {
     yearBuilt: 2010,
     renovated: 2022,
     groundsSize: 'Resort Grounds',
-    description: 'Escape to Villa Lucilla, a stunning 3-bedroom villa nestled in the prestigious Anthorina Gardens Resort in Protaras, Cyprus. This beautifully appointed property offers the perfect blend of luxury and comfort, featuring a private pool, modern amenities, and breathtaking views of the Mediterranean landscape. Located just minutes from pristine beaches and local attractions, Villa Lucilla provides an ideal base for your Cyprus getaway.',
+    description: 'Escape to Villa Lucilla, a stunning 3-bedroom villa nestled in the prestigious Anthorina Gardens Resort in Protaras, Cyprus. This beautifully appointed property offers the perfect blend of luxury and comfort, featuring a private pool, modern amenities, and breathtaking views of the Mediterranean landscape.',
     amenities: [
       'Private Swimming Pool',
       'Air Conditioning',
@@ -60,82 +60,64 @@ const Index = () => {
 
   const pricePerNight = 185;
 
-  if (showManagement) {
-    return <PropertyManagementDashboard />;
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-cyan-600/20 rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="relative">
+        <HeroHeader 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+        />
+        <div className="absolute top-4 right-4">
+          <NotificationSystem />
+        </div>
       </div>
 
-      <div className="relative z-10">
-        {/* Header with improved glass effect */}
-        <div className="relative">
-          <HeroHeader 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-          />
-          <div className="absolute top-4 right-4">
-            <NotificationSystem />
-          </div>
-        </div>
+      {/* Hero Section */}
+      <VillaHeroSection
+        bedrooms={property.bedrooms}
+        maxGuests={property.maxGuests}
+        pricePerNight={pricePerNight}
+        rating={property.rating}
+        onBookingClick={() => setShowEnhancedBooking(true)}
+        onManagementClick={() => {}}
+      />
 
-        {/* Hero Section with enhanced visual appeal */}
-        <VillaHeroSection
-          bedrooms={property.bedrooms}
-          maxGuests={property.maxGuests}
-          pricePerNight={pricePerNight}
-          rating={property.rating}
-          onBookingClick={() => setShowEnhancedBooking(true)}
-          onManagementClick={() => setShowManagement(true)}
-        />
+      {/* Enhanced Booking Modal */}
+      <EnhancedBookingModal
+        isOpen={showEnhancedBooking}
+        onClose={() => setShowEnhancedBooking(false)}
+        pricePerNight={pricePerNight}
+      />
 
-        {/* Enhanced Booking Modal */}
-        <EnhancedBookingModal
-          isOpen={showEnhancedBooking}
-          onClose={() => setShowEnhancedBooking(false)}
-          pricePerNight={pricePerNight}
-        />
+      {/* Villa Gallery */}
+      <VillaGallerySection images={property.images} />
 
-        {/* Featured Property Section */}
-        <FeaturedProperty />
+      {/* Availability Section */}
+      <AvailabilitySection />
+      
+      {/* Villa Details */}
+      <VillaDetailsSection 
+        property={property} 
+        pricePerNight={pricePerNight} 
+      />
 
-        {/* Villa Showcase with improved spacing */}
-        <div className="py-8">
-          <EnhancedVillaShowcase />
-        </div>
+      {/* Why Choose Section */}
+      <WhyChooseSection />
 
-        {/* Availability Section with enhanced styling */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-indigo-600/5 to-purple-600/5"></div>
-          <AvailabilitySection />
-        </div>
-        
-        {/* Villa Details with improved layout */}
-        <div className="bg-white/70 backdrop-blur-sm">
-          <VillaDetailsSection 
-            property={property} 
-            pricePerNight={pricePerNight} 
-          />
-        </div>
+      {/* Additional Services */}
+      <AdditionalServicesSection />
 
-        {/* Why Choose Section */}
-        <WhyChooseSection />
+      {/* Location Section */}
+      <LocationSection />
 
-        {/* Footer CTA with enhanced gradient */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900"></div>
-          <div className="relative">
-            <FooterCTA />
-          </div>
-        </div>
-      </div>
+      {/* Testimonials */}
+      <TestimonialsSection />
+
+      {/* Footer CTA */}
+      <FooterCTA />
     </div>
   );
 };
