@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, Mail, User, Phone, Info } from 'lucide-react';
+import { Users, Mail, User, Phone, Info, Heart, Star } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 
 interface BookingFormProps {
@@ -52,43 +52,59 @@ const BookingForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Date Selection */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <Label className="text-sm font-semibold mb-3 block text-gray-700">Select Your Dates</Label>
-        <div className="mb-3">
-          <div className="flex items-center gap-4 text-xs text-gray-600">
-            <div className="flex items-center gap-1">
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+        <Label className="text-lg font-bold mb-4 block text-gray-800 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-blue-600" />
+          🗓️ Pick Your Perfect Dates
+        </Label>
+        <p className="text-sm text-gray-600 mb-4">Choose when you'd like to experience Villa Lucilla's magic!</p>
+        
+        <div className="mb-4">
+          <div className="flex items-center gap-6 text-xs text-gray-600 bg-white/60 rounded-lg px-4 py-2">
+            <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
               <span>Unavailable</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-600 rounded"></div>
-              <span>Selected</span>
+              <span>Your selection</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="h-3 w-3 text-yellow-500 fill-current" />
+              <span>Available</span>
             </div>
           </div>
         </div>
+        
         <Calendar
           mode="range"
           selected={selectedDates}
           onSelect={setSelectedDates}
           disabled={disabledDates}
-          className="rounded-md border-0 bg-white shadow-sm w-full"
+          className="rounded-xl border-0 bg-white/80 backdrop-blur-sm shadow-lg w-full hover:shadow-xl transition-shadow"
           numberOfMonths={1}
         />
+        
         {unavailableDates.length > 0 && (
-          <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+          <p className="text-xs text-gray-500 mt-3 flex items-center gap-2 bg-white/60 rounded-lg px-3 py-2">
             <Info className="h-3 w-3" />
-            Red dates are not available for booking
+            Red dates are already taken, but there are plenty of amazing dates available!
           </p>
         )}
       </div>
 
       {/* Guest Count */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <Label htmlFor="guests" className="text-sm font-semibold mb-3 block text-gray-700">Number of Guests</Label>
-        <div className="flex items-center gap-3 bg-white rounded-md p-3 border">
-          <Users className="h-5 w-5 text-gray-400" />
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
+        <Label htmlFor="guests" className="text-lg font-bold mb-4 block text-gray-800 flex items-center gap-2">
+          <Users className="h-5 w-5 text-purple-600" />
+          👥 How Many Amazing People?
+        </Label>
+        <p className="text-sm text-gray-600 mb-4">Villa Lucilla loves welcoming groups of all sizes!</p>
+        
+        <div className="flex items-center gap-4 bg-white/80 rounded-xl p-4 border-2 border-purple-200 hover:border-purple-300 transition-colors">
+          <Users className="h-6 w-6 text-purple-400" />
           <Input
             id="guests"
             type="number"
@@ -96,65 +112,79 @@ const BookingForm = ({
             max="6"
             value={guestCount}
             onChange={(e) => setGuestCount(parseInt(e.target.value))}
-            className="flex-1 border-0 focus:ring-0 p-0"
+            className="flex-1 border-0 focus:ring-0 p-0 text-lg font-semibold"
           />
-          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">max 6</span>
+          <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-4 py-2 rounded-full text-sm font-bold">
+            max 6 guests
+          </div>
         </div>
       </div>
 
       {/* Guest Information */}
-      <div className="space-y-4 border-t pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold text-gray-700">Guest Information</h3>
-          <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-            No account needed
+      <div className="space-y-6 border-t-4 border-blue-200 pt-8">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <h3 className="text-2xl font-bold text-gray-800">Tell Us About Yourself</h3>
+            <Heart className="h-6 w-6 text-red-500 fill-current animate-pulse" />
+          </div>
+          <div className="inline-flex items-center gap-2 text-sm text-green-700 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full font-medium">
+            ✨ No account needed - we keep it simple!
           </div>
         </div>
         
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <Label htmlFor="guestName" className="text-sm font-medium mb-2 block text-gray-600">Full Name *</Label>
-            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-              <User className="h-4 w-4 text-gray-400 ml-3" />
+        <div className="grid grid-cols-1 gap-6">
+          <div className="group">
+            <Label htmlFor="guestName" className="text-base font-bold mb-3 block text-gray-700 flex items-center gap-2">
+              <User className="h-4 w-4 text-blue-600" />
+              What's your name? *
+            </Label>
+            <div className="flex items-center gap-3 bg-white rounded-xl border-2 border-gray-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all group-hover:border-blue-300">
+              <User className="h-5 w-5 text-gray-400 ml-4" />
               <Input
                 id="guestName"
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Enter your full name"
-                className="flex-1 border-0 focus:ring-0"
+                placeholder="We'd love to know your name!"
+                className="flex-1 border-0 focus:ring-0 py-4 text-lg"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="guestEmail" className="text-sm font-medium mb-2 block text-gray-600">Email Address *</Label>
-            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-              <Mail className="h-4 w-4 text-gray-400 ml-3" />
+          <div className="group">
+            <Label htmlFor="guestEmail" className="text-base font-bold mb-3 block text-gray-700 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-blue-600" />
+              Your email address *
+            </Label>
+            <div className="flex items-center gap-3 bg-white rounded-xl border-2 border-gray-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all group-hover:border-blue-300">
+              <Mail className="h-5 w-5 text-gray-400 ml-4" />
               <Input
                 id="guestEmail"
                 type="email"
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="flex-1 border-0 focus:ring-0"
+                placeholder="So we can send you confirmation details"
+                className="flex-1 border-0 focus:ring-0 py-4 text-lg"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="guestPhone" className="text-sm font-medium mb-2 block text-gray-600">Phone Number *</Label>
-            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-              <Phone className="h-4 w-4 text-gray-400 ml-3" />
+          <div className="group">
+            <Label htmlFor="guestPhone" className="text-base font-bold mb-3 block text-gray-700 flex items-center gap-2">
+              <Phone className="h-4 w-4 text-blue-600" />
+              Phone number *
+            </Label>
+            <div className="flex items-center gap-3 bg-white rounded-xl border-2 border-gray-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100 transition-all group-hover:border-blue-300">
+              <Phone className="h-5 w-5 text-gray-400 ml-4" />
               <Input
                 id="guestPhone"
                 type="tel"
                 value={guestPhone}
                 onChange={(e) => setGuestPhone(e.target.value)}
-                placeholder="+1 (555) 123-4567"
-                className="flex-1 border-0 focus:ring-0"
+                placeholder="Just in case we need to reach you"
+                className="flex-1 border-0 focus:ring-0 py-4 text-lg"
                 required
               />
             </div>
@@ -163,16 +193,25 @@ const BookingForm = ({
       </div>
 
       {/* Special Requests */}
-      <div>
-        <Label htmlFor="requests" className="text-sm font-medium mb-3 block text-gray-600">Special Requests (Optional)</Label>
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-100">
+        <Label htmlFor="requests" className="text-lg font-bold mb-4 block text-gray-800 flex items-center gap-2">
+          <Heart className="h-5 w-5 text-orange-600" />
+          💫 Any Special Wishes?
+        </Label>
+        <p className="text-sm text-gray-600 mb-4">Tell us how we can make your stay extra special!</p>
+        
         <Textarea
           id="requests"
           value={specialRequests}
           onChange={(e) => setSpecialRequests(e.target.value)}
-          placeholder="Airport transfer, early check-in, dietary requirements, celebration arrangements..."
-          className="resize-none bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          rows={3}
+          placeholder="🚗 Airport transfer? 🎂 Celebrating something special? 🍽️ Dietary needs? We're here to help make it perfect!"
+          className="resize-none bg-white/80 border-2 border-orange-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-100 rounded-xl text-base min-h-[100px] hover:border-orange-300 transition-colors"
+          rows={4}
         />
+        
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          💡 Pro tip: The more you tell us, the more we can personalize your experience!
+        </p>
       </div>
     </div>
   );
