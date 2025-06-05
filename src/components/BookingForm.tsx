@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, Mail, User, Phone } from 'lucide-react';
+import { Users, Mail, User, Phone, Info } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 
 interface BookingFormProps {
@@ -52,10 +52,11 @@ const BookingForm = ({
   };
 
   return (
-    <>
-      <div>
-        <Label className="text-sm font-medium mb-2 block">Select Dates</Label>
-        <div className="mb-2">
+    <div className="space-y-6">
+      {/* Date Selection */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <Label className="text-sm font-semibold mb-3 block text-gray-700">Select Your Dates</Label>
+        <div className="mb-3">
           <div className="flex items-center gap-4 text-xs text-gray-600">
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
@@ -72,20 +73,22 @@ const BookingForm = ({
           selected={selectedDates}
           onSelect={setSelectedDates}
           disabled={disabledDates}
-          className="rounded-md border w-full"
+          className="rounded-md border-0 bg-white shadow-sm w-full"
           numberOfMonths={1}
         />
         {unavailableDates.length > 0 && (
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <Info className="h-3 w-3" />
             Red dates are not available for booking
           </p>
         )}
       </div>
 
-      <div>
-        <Label htmlFor="guests" className="text-sm font-medium mb-2 block">Number of Guests</Label>
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-gray-400" />
+      {/* Guest Count */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <Label htmlFor="guests" className="text-sm font-semibold mb-3 block text-gray-700">Number of Guests</Label>
+        <div className="flex items-center gap-3 bg-white rounded-md p-3 border">
+          <Users className="h-5 w-5 text-gray-400" />
           <Input
             id="guests"
             type="number"
@@ -93,76 +96,85 @@ const BookingForm = ({
             max="6"
             value={guestCount}
             onChange={(e) => setGuestCount(parseInt(e.target.value))}
-            className="flex-1"
+            className="flex-1 border-0 focus:ring-0 p-0"
           />
-          <span className="text-sm text-gray-500">max 6</span>
+          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">max 6</span>
         </div>
       </div>
 
-      <div className="space-y-4 border-t pt-4">
-        <h3 className="text-sm font-medium">Guest Details</h3>
+      {/* Guest Information */}
+      <div className="space-y-4 border-t pt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold text-gray-700">Guest Information</h3>
+          <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+            No account needed
+          </div>
+        </div>
         
-        <div>
-          <Label htmlFor="guestName" className="text-sm font-medium mb-2 block">Full Name</Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-gray-400" />
-            <Input
-              id="guestName"
-              type="text"
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Your full name"
-              className="flex-1"
-              required
-            />
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <Label htmlFor="guestName" className="text-sm font-medium mb-2 block text-gray-600">Full Name *</Label>
+            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+              <User className="h-4 w-4 text-gray-400 ml-3" />
+              <Input
+                id="guestName"
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Enter your full name"
+                className="flex-1 border-0 focus:ring-0"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <div>
-          <Label htmlFor="guestEmail" className="text-sm font-medium mb-2 block">Email Address</Label>
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-gray-400" />
-            <Input
-              id="guestEmail"
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="flex-1"
-              required
-            />
+          <div>
+            <Label htmlFor="guestEmail" className="text-sm font-medium mb-2 block text-gray-600">Email Address *</Label>
+            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+              <Mail className="h-4 w-4 text-gray-400 ml-3" />
+              <Input
+                id="guestEmail"
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="flex-1 border-0 focus:ring-0"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <div>
-          <Label htmlFor="guestPhone" className="text-sm font-medium mb-2 block">Phone Number</Label>
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-gray-400" />
-            <Input
-              id="guestPhone"
-              type="tel"
-              value={guestPhone}
-              onChange={(e) => setGuestPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
-              className="flex-1"
-              required
-            />
+          <div>
+            <Label htmlFor="guestPhone" className="text-sm font-medium mb-2 block text-gray-600">Phone Number *</Label>
+            <div className="flex items-center gap-2 bg-white rounded-md border focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+              <Phone className="h-4 w-4 text-gray-400 ml-3" />
+              <Input
+                id="guestPhone"
+                type="tel"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                placeholder="+1 (555) 123-4567"
+                className="flex-1 border-0 focus:ring-0"
+                required
+              />
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Special Requests */}
       <div>
-        <Label htmlFor="requests" className="text-sm font-medium mb-2 block">Special Requests</Label>
+        <Label htmlFor="requests" className="text-sm font-medium mb-3 block text-gray-600">Special Requests (Optional)</Label>
         <Textarea
           id="requests"
           value={specialRequests}
           onChange={(e) => setSpecialRequests(e.target.value)}
-          placeholder="Airport transfer, early check-in, special arrangements..."
-          className="resize-none"
+          placeholder="Airport transfer, early check-in, dietary requirements, celebration arrangements..."
+          className="resize-none bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           rows={3}
         />
       </div>
-    </>
+    </div>
   );
 };
 
