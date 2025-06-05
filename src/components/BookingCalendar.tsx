@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useBookingLogic } from '@/hooks/useBookingLogic';
-import BookingForm from '@/components/BookingForm';
+import EnhancedBookingForm from '@/components/EnhancedBookingForm';
 import BookingPricing from '@/components/BookingPricing';
 import BookingButton from '@/components/BookingButton';
 import ContactInfo from '@/components/ContactInfo';
@@ -37,12 +37,10 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
   const { data: availability = [], isLoading: isLoadingAvailability } = useQuery({
     queryKey: ['availability', propertyId],
     queryFn: async () => {
-      // Check if we have a valid UUID format property ID
       const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(propertyId);
       
       if (!isValidUUID) {
         console.log('Invalid property ID format, returning sample unavailable dates');
-        // Return some sample unavailable dates for demo
         const today = new Date();
         const sampleUnavailable = [];
         for (let i = 10; i < 15; i++) {
@@ -116,7 +114,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           </div>
         )}
 
-        <BookingForm
+        <EnhancedBookingForm
           selectedDates={selectedDates}
           setSelectedDates={setSelectedDates}
           guestCount={guestCount}
@@ -130,6 +128,7 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           setGuestEmail={setGuestEmail}
           guestPhone={guestPhone}
           setGuestPhone={setGuestPhone}
+          basePrice={pricePerNight}
         />
 
         <BookingPricing
@@ -144,7 +143,6 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           isDisabled={!selectedDates?.from || !selectedDates?.to || !guestName.trim() || !guestEmail.trim() || !guestPhone.trim()}
         />
 
-        {/* Trust Indicators */}
         <div className="border-t pt-4 space-y-3">
           <div className="text-xs text-gray-500 text-center">
             <div className="flex items-center justify-center gap-4 mb-2">
