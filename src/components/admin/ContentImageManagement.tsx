@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Edit, Trash2, Plus, Eye, Globe, Image, Upload, Save } from 'lucide-react';
+import { FileText, Edit, Trash2, Plus, Upload, Save, Palette, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ImageEditor from './ImageEditor';
+import BulkImageOperations from './BulkImageOperations';
 
 const ContentImageManagement = () => {
   const { toast } = useToast();
@@ -20,6 +21,8 @@ const ContentImageManagement = () => {
   const [newContentType, setNewContentType] = useState('page');
   const [newContentStatus, setNewContentStatus] = useState('draft');
   const [activeImageCategory, setActiveImageCategory] = useState('hero');
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [editingImageUrl, setEditingImageUrl] = useState('');
 
   // Mock content data
   const contentItems = [
@@ -127,6 +130,11 @@ const ContentImageManagement = () => {
     });
   };
 
+  const openImageEditor = (imageUrl: string) => {
+    setEditingImageUrl(imageUrl);
+    setShowImageEditor(true);
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'published': return 'default';
@@ -152,14 +160,16 @@ const ContentImageManagement = () => {
         <h2 className="text-2xl font-bold">Content & Image Management</h2>
         <Badge variant="default" className="bg-blue-600">
           <Edit className="h-4 w-4 mr-1" />
-          Content Editor
+          Advanced Editor
         </Badge>
       </div>
 
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="content">Content Management</TabsTrigger>
-          <TabsTrigger value="images">Image Management</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="images">Images</TabsTrigger>
+          <TabsTrigger value="editor">Advanced Editor</TabsTrigger>
+          <TabsTrigger value="bulk">Bulk Operations</TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="mt-6">
@@ -370,7 +380,7 @@ const ContentImageManagement = () => {
                   </Select>
                 </div>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <Image className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600 mb-2">Drag and drop your image here, or</p>
                   <Button onClick={handleImageUpload}>
                     <Upload className="h-4 w-4 mr-2" />
@@ -399,8 +409,13 @@ const ContentImageManagement = () => {
                         <p className="text-sm text-gray-600">{image.alt}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Edit className="h-4 w-4 mr-1" />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => openImageEditor(image.url)}
+                        >
+                          <Palette className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
                         <Button 
@@ -418,7 +433,43 @@ const ContentImageManagement = () => {
             </Card>
           </div>
         </TabsContent>
+
+        <TabsContent value="editor" className="mt-6">
+          <ImageEditor 
+            imageUrl={editingImageUrl}
+            onSave={(blob) => {
+              toast({
+                title: "Image Saved",
+                description: "Your edited image has been saved successfully.",
+              });
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="bulk" className="mt-6">
+          <BulkImageOperations />
+        </TabsContent>
       </Tabs>
+
+      {/* Image Editor Dialog */}
+      <Dialog open={showImageEditor} onOpenChange={setShowImageEditor}>
+        <DialogContent className="max-w-7xl w-full max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Advanced Image Editor</DialogTitle>
+          </DialogHeader>
+          <ImageEditor 
+            imageUrl={editingImageUrl}
+            onSave={(blob) => {
+              toast({
+                title: "Image Saved",
+                description: "Your edited image has been saved successfully.",
+              });
+              setShowImageEditor(false);
+            }}
+            onClose={() => setShowImageEditor(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
