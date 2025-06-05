@@ -65,12 +65,17 @@ const EnhancedBookingForm = ({
     );
   };
 
+  // Create a properly typed date range for DynamicPricing
+  const pricingDates = selectedDates?.from && selectedDates?.to 
+    ? { from: selectedDates.from, to: selectedDates.to } 
+    : null;
+
   return (
     <div className="space-y-8">
       {/* Dynamic Pricing Card */}
       <DynamicPricing 
         basePrice={basePrice}
-        selectedDates={selectedDates}
+        selectedDates={pricingDates}
         guestCount={guestCount}
       />
 
