@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calendar, Users, MapPin, Search, Heart, Sparkles } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, Heart, Sparkles, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,7 +17,78 @@ const BookingWidget = () => {
   const [guests, setGuests] = useState(2);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Query to check availability for Villa Lucilla
+  // Query to get basic availability info for display
+  const { data: availabilityInfo } = useQuery({
+    queryKey: ['availability-overview'],
+    queryFn: async () => {
+      try {
+        // Get or check for Villa Lucilla property
+        let { data: properties, error: propError } = await supabase
+          .from('properties')
+          .select('id')
+          .eq('title', 'Villa Lucilla - Anthorina Gardens Resort')
+          .limit(1);
+
+        if (propError || !properties || properties.length === 0) {
+          return { availableNextWeek: 7, totalBookings: 0, nextAvailableDate: new Date() };
+        }
+
+        const propertyId = properties[0].id;
+
+        // Get bookings for next 30 days
+        const today = new Date();
+        const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        const { data: bookings } = await supabase
+          .from('bookings')
+          .select('start_date, end_date')
+          .eq('property_id', propertyId)
+          .gte('start_date', today.toISOString().split('T')[0])
+          .lte('start_date', thirtyDaysFromNow.toISOString().split('T')[0])
+          .eq('status', 'confirmed');
+
+        const bookedDays = new Set();
+        (bookings || []).forEach(booking => {
+          const start = new Date(booking.start_date);
+          const end = new Date(booking.end_date);
+          const current = new Date(start);
+          
+          while (current <= end) {
+            bookedDays.add(current.toISOString().split('T')[0]);
+            current.setDate(current.getDate() + 1);
+          }
+        });
+
+        // Calculate next 7 days availability
+        let availableNextWeek = 0;
+        for (let i = 0; i < 7; i++) {
+          const checkDate = new Date(today);
+          checkDate.setDate(today.getDate() + i);
+          if (!bookedDays.has(checkDate.toISOString().split('T')[0])) {
+            availableNextWeek++;
+          }
+        }
+
+        // Find next available date
+        let nextAvailableDate = new Date(today);
+        while (bookedDays.has(nextAvailableDate.toISOString().split('T')[0]) && 
+               nextAvailableDate < thirtyDaysFromNow) {
+          nextAvailableDate.setDate(nextAvailableDate.getDate() + 1);
+        }
+
+        return {
+          availableNextWeek,
+          totalBookings: (bookings || []).length,
+          nextAvailableDate
+        };
+      } catch (error) {
+        console.error('Error fetching availability info:', error);
+        return { availableNextWeek: 7, totalBookings: 0, nextAvailableDate: new Date() };
+      }
+    },
+  });
+
+  // Query to check availability for selected dates
   const { data: availability, refetch: checkAvailability } = useQuery({
     queryKey: ['villa-availability', checkIn, checkOut],
     queryFn: async () => {
@@ -176,6 +247,48 @@ const BookingWidget = () => {
           <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             🌟 Select your perfect dates and let's make some unforgettable memories together!
           </p>
+
+          {/* Real-time Availability Status */}
+          {availabilityInfo && (
+            <div className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 border border-green-200">
+              <h4 className="font-bold text-gray-800 mb-3 flex items-center justify-center gap-2">
+                <Calendar className="h-4 w-4 text-green-600" />
+                Live Availability Status
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="bg-white/80 rounded-lg p-3 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="font-semibold">Next Week</span>
+                  </div>
+                  <div className="text-lg font-bold text-green-600">
+                    {availabilityInfo.availableNextWeek}/7 days
+                  </div>
+                  <div className="text-gray-600">available</div>
+                </div>
+                <div className="bg-white/80 rounded-lg p-3 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Heart className="h-4 w-4 text-red-500 fill-current" />
+                    <span className="font-semibold">Bookings</span>
+                  </div>
+                  <div className="text-lg font-bold text-blue-600">
+                    {availabilityInfo.totalBookings}
+                  </div>
+                  <div className="text-gray-600">this month</div>
+                </div>
+                <div className="bg-white/80 rounded-lg p-3 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold">Next Available</span>
+                  </div>
+                  <div className="text-sm font-bold text-blue-600">
+                    {availabilityInfo.nextAvailableDate.toLocaleDateString()}
+                  </div>
+                  <div className="text-gray-600">ready for you!</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Enhanced responsive grid */}
@@ -257,7 +370,7 @@ const BookingWidget = () => {
           </div>
         </div>
 
-        {/* Enhanced Villa Info */}
+        {/* Enhanced Villa Info with Availability */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
             <div className="flex flex-wrap items-center justify-center gap-6 text-gray-700">

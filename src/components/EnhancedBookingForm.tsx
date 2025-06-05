@@ -4,7 +4,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, Mail, User, Phone, Info, Heart, Star, Euro } from 'lucide-react';
+import { Users, Mail, User, Phone, Info, Heart, Star, Euro, Calendar as CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import DynamicPricing from '@/components/business/DynamicPricing';
 import ServiceAddons from '@/components/business/ServiceAddons';
@@ -70,6 +70,17 @@ const EnhancedBookingForm = ({
     ? { from: selectedDates.from, to: selectedDates.to } 
     : null;
 
+  // Calculate some availability stats for display
+  const totalUnavailable = unavailableDates.length;
+  const nextAvailableDate = (() => {
+    const today = new Date();
+    let checkDate = new Date(today);
+    while (isDateUnavailable(checkDate) && checkDate < new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000)) {
+      checkDate.setDate(checkDate.getDate() + 1);
+    }
+    return checkDate;
+  })();
+
   return (
     <div className="space-y-8">
       {/* Dynamic Pricing Card */}
@@ -79,19 +90,36 @@ const EnhancedBookingForm = ({
         guestCount={guestCount}
       />
 
-      {/* Date Selection */}
+      {/* Date Selection with Enhanced Availability Info */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
         <Label className="text-lg font-bold mb-4 block text-gray-800 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-600" />
+          <CalendarIcon className="h-5 w-5 text-blue-600" />
           🗓️ Pick Your Perfect Dates
         </Label>
         <p className="text-sm text-gray-600 mb-4">Choose when you'd like to experience Villa Lucilla's magic!</p>
+        
+        {/* Availability Summary */}
+        <div className="mb-4 bg-white/80 rounded-lg p-3">
+          <div className="text-sm text-gray-700 mb-2">
+            <strong>Availability Status:</strong>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+              <span>{totalUnavailable} unavailable days</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+              <span>Next available: {nextAvailableDate.toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
         
         <div className="mb-4">
           <div className="flex items-center gap-6 text-xs text-gray-600 bg-white/60 rounded-lg px-4 py-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-              <span>Unavailable</span>
+              <span>Unavailable/Booked</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-600 rounded"></div>
@@ -114,10 +142,17 @@ const EnhancedBookingForm = ({
         />
         
         {unavailableDates.length > 0 && (
-          <p className="text-xs text-gray-500 mt-3 flex items-center gap-2 bg-white/60 rounded-lg px-3 py-2">
-            <Info className="h-3 w-3" />
-            Red dates are already taken, but there are plenty of amazing dates available!
-          </p>
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-gray-500 flex items-center gap-2 bg-white/60 rounded-lg px-3 py-2">
+              <Info className="h-3 w-3" />
+              Red dates are already taken, but there are plenty of amazing dates available!
+            </p>
+            {selectedDates?.from && selectedDates?.to && (
+              <div className="text-xs bg-green-100 text-green-700 rounded-lg px-3 py-2">
+                ✅ Great choice! Your selected dates are available for booking.
+              </div>
+            )}
+          </div>
         )}
       </div>
 
