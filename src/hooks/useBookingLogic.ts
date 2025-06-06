@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import { useCoupons } from '@/hooks/useCoupons';
 
 interface UseBookingLogicProps {
   propertyId: string;
@@ -20,6 +20,16 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
+
+  const {
+    appliedCoupon,
+    couponCode,
+    setCouponCode,
+    isValidating,
+    validateCoupon,
+    calculateDiscount,
+    removeCoupon,
+  } = useCoupons();
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
@@ -134,12 +144,20 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     return Math.max(1, differenceInDays(selectedDates.to, selectedDates.from));
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     const nights = calculateNights();
-    const subtotal = nights * pricePerNight;
-    const cleaningFee = 50;
-    const serviceFee = 25;
-    return subtotal + cleaningFee + serviceFee;
+    return nights * pricePerNight + 50 + 25; // base price + cleaning + service
+  };
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    const discount = calculateDiscount(subtotal);
+    return subtotal - discount;
+  };
+
+  const handleCouponApply = async (code: string) => {
+    const subtotal = calculateSubtotal();
+    return await validateCoupon(code, subtotal);
   };
 
   const handleBooking = () => {
@@ -182,6 +200,8 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
       guest_name: guestName,
       guest_email: guestEmail,
       guest_phone: guestPhone,
+      coupon_code: appliedCoupon?.code || null,
+      discount_amount: appliedCoupon ? calculateDiscount(calculateSubtotal()) : 0,
     };
 
     createBookingMutation.mutate(bookingData);
@@ -203,6 +223,15 @@ export const useBookingLogic = ({ propertyId, pricePerNight }: UseBookingLogicPr
     createBookingMutation,
     calculateNights,
     calculateTotal,
+    calculateSubtotal,
     handleBooking,
+    // Coupon functionality
+    appliedCoupon,
+    couponCode,
+    setCouponCode,
+    isValidating,
+    calculateDiscount,
+    handleCouponApply,
+    removeCoupon,
   };
 };

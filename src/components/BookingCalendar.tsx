@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +6,7 @@ import EnhancedBookingForm from '@/components/EnhancedBookingForm';
 import BookingPricing from '@/components/BookingPricing';
 import BookingButton from '@/components/BookingButton';
 import ContactInfo from '@/components/ContactInfo';
+import CouponInput from '@/components/CouponInput';
 import { Shield, Clock, CheckCircle, Calendar, AlertCircle } from 'lucide-react';
 
 interface BookingCalendarProps {
@@ -31,7 +31,15 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
     createBookingMutation,
     calculateNights,
     calculateTotal,
+    calculateSubtotal,
     handleBooking,
+    appliedCoupon,
+    couponCode,
+    setCouponCode,
+    isValidating,
+    calculateDiscount,
+    handleCouponApply,
+    removeCoupon,
   } = useBookingLogic({ propertyId, pricePerNight });
 
   const { data: availability = [], isLoading: isLoadingAvailability } = useQuery({
@@ -115,6 +123,8 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
 
   const allUnavailableDates = [...unavailableDates, ...bookedDates];
   const nights = calculateNights();
+  const subtotal = calculateSubtotal();
+  const discount = calculateDiscount(subtotal);
 
   // Calculate availability stats
   const totalDays = availability.length;
@@ -228,10 +238,22 @@ const BookingCalendar = ({ propertyId, pricePerNight }: BookingCalendarProps) =>
           basePrice={pricePerNight}
         />
 
+        <CouponInput
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+          onApplyCoupon={handleCouponApply}
+          appliedCoupon={appliedCoupon}
+          onRemoveCoupon={removeCoupon}
+          isValidating={isValidating}
+          subtotal={subtotal}
+        />
+
         <BookingPricing
           pricePerNight={pricePerNight}
           nights={nights}
           total={calculateTotal()}
+          discount={discount}
+          appliedCoupon={appliedCoupon}
         />
 
         <BookingButton
