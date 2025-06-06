@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,7 @@ import PropertyAnalytics from './PropertyAnalytics';
 
 const EnhancedPropertyOwnerDashboard = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -95,8 +96,11 @@ const EnhancedPropertyOwnerDashboard = () => {
   const selectedProperty = properties.find(p => p.id === selectedPropertyId) || properties[0];
 
   const handlePropertyUpdate = () => {
-    // Refresh the page or refetch data
-    window.location.reload();
+    // Invalidate and refetch all related queries
+    queryClient.invalidateQueries({ queryKey: ['owner-properties', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-stats', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['property', selectedPropertyId] });
+    queryClient.invalidateQueries({ queryKey: ['property-analytics', selectedPropertyId] });
   };
 
   if (propertiesLoading) {
