@@ -22,11 +22,11 @@ const BookingWidget = () => {
     queryKey: ['availability-overview'],
     queryFn: async () => {
       try {
-        // Get or check for Villa Lucilla property
-        let { data: properties, error: propError } = await supabase
+        // Get any active property for demo
+        const { data: properties, error: propError } = await supabase
           .from('properties')
           .select('id')
-          .eq('title', 'Villa Lucilla - Anthorina Gardens Resort')
+          .eq('status', 'active')
           .limit(1);
 
         if (propError || !properties || properties.length === 0) {
@@ -96,49 +96,18 @@ const BookingWidget = () => {
 
       console.log('Checking availability for dates:', checkIn, 'to', checkOut);
       
-      // Get or create Villa Lucilla property
-      let { data: properties, error: propError } = await supabase
+      // Get any active property for demo
+      const { data: properties, error: propError } = await supabase
         .from('properties')
         .select('id')
-        .eq('title', 'Villa Lucilla - Anthorina Gardens Resort')
+        .eq('status', 'active')
         .limit(1);
 
-      if (propError) {
-        console.error('Error fetching property:', propError);
-        throw new Error('Unable to check availability');
+      if (propError || !properties || properties.length === 0) {
+        throw new Error('No properties available');
       }
 
-      let propertyId;
-      if (!properties || properties.length === 0) {
-        // Create Villa Lucilla property if it doesn't exist
-        const { data: newProperty, error: createError } = await supabase
-          .from('properties')
-          .insert({
-            title: 'Villa Lucilla - Anthorina Gardens Resort',
-            address: 'Konnou street 17, Anthorina Gardens Resort',
-            city: 'Protaras',
-            state: 'Famagusta District',
-            zip_code: '5290',
-            property_type: 'Villa',
-            price: 185,
-            bedrooms: 3,
-            bathrooms: 2,
-            description: 'Beautiful villa in Cyprus with stunning sea views and private pool.',
-            status: 'active',
-            images: ['/placeholder.svg'],
-            amenities: ['Pool', 'WiFi', 'Air Conditioning', 'Kitchen', 'Parking']
-          })
-          .select('id')
-          .single();
-
-        if (createError) {
-          console.error('Error creating property:', createError);
-          throw new Error('Unable to check availability');
-        }
-        propertyId = newProperty.id;
-      } else {
-        propertyId = properties[0].id;
-      }
+      const propertyId = properties[0].id;
 
       // Check for existing bookings in the date range
       const { data: bookings, error: bookingError } = await supabase
@@ -193,14 +162,14 @@ const BookingWidget = () => {
     }
 
     setIsSearching(true);
-    console.log('Checking Villa Lucilla availability...', { checkIn, checkOut, guests });
+    console.log('Checking availability...', { checkIn, checkOut, guests });
 
     try {
       const result = await checkAvailability();
       
       if (result?.data?.isAvailable) {
         toast({
-          title: "🎉 Amazing! Villa Lucilla is Available!",
+          title: "🎉 Amazing! Dates are Available!",
           description: `Your dream dates ${new Date(checkIn).toLocaleDateString()} to ${new Date(checkOut).toLocaleDateString()} are free!`,
         });
         
@@ -242,7 +211,7 @@ const BookingWidget = () => {
             <span>Your Cyprus Adventure Starts Here</span>
           </div>
           <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            Check Villa Lucilla Availability
+            Check Availability
           </h3>
           <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             🌟 Select your perfect dates and let's make some unforgettable memories together!
