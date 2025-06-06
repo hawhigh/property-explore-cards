@@ -17,7 +17,7 @@ import Header from '@/components/Header';
 import PropertyStats from '@/components/PropertyStats';
 import QuickActions from '@/components/QuickActions';
 import RecentActivity from '@/components/RecentActivity';
-import PropertyOwnerDashboard from '@/components/property-management/PropertyOwnerDashboard';
+import EnhancedPropertyOwnerDashboard from '@/components/property-management/EnhancedPropertyOwnerDashboard';
 import PropertyPerformanceChart from '@/components/property-management/PropertyPerformanceChart';
 import PropertyListingManagement from '@/components/property-management/PropertyListingManagement';
 import BookingManagement from '@/components/property-management/BookingManagement';
@@ -69,7 +69,7 @@ const Dashboard = () => {
 
           <Tabs defaultValue="owner-dashboard" className="w-full">
             <TabsList className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-7 lg:w-[700px]' : 'md:grid-cols-6 lg:w-[600px]'}`}>
-              <TabsTrigger value="owner-dashboard">Owner Hub</TabsTrigger>
+              <TabsTrigger value="owner-dashboard">Management Hub</TabsTrigger>
               <TabsTrigger value="listings">My Listings</TabsTrigger>
               <TabsTrigger value="booking-mgmt">Bookings</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -79,16 +79,7 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="owner-dashboard" className="mt-6">
-              <div className="space-y-8">
-                {/* Property Owner Dashboard */}
-                <PropertyOwnerDashboard />
-                
-                {/* Performance Charts */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold">Performance Analytics</h3>
-                  <PropertyPerformanceChart />
-                </div>
-              </div>
+              <EnhancedPropertyOwnerDashboard />
             </TabsContent>
 
             <TabsContent value="listings" className="mt-6">
