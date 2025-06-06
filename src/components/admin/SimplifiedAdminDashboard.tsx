@@ -7,6 +7,8 @@ import PropertyOwnerManagement from '@/components/admin/PropertyOwnerManagement'
 import ContentImageManagement from '@/components/admin/ContentImageManagement';
 import EmailManagement from '@/components/admin/EmailManagement';
 import SalesAnalytics from '@/components/admin/SalesAnalytics';
+import RolesAccessOverview from '@/components/admin/RolesAccessOverview';
+import AdminConnectionStatus from '@/components/admin/AdminConnectionStatus';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Header from '@/components/Header';
 
@@ -30,18 +32,27 @@ const SimplifiedAdminDashboard = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="analytics">Sales & Analytics</TabsTrigger>
-              <TabsTrigger value="emails">Email Management</TabsTrigger>
+              <TabsTrigger value="connection">Connection</TabsTrigger>
+              <TabsTrigger value="roles">Roles & Access</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="emails">Emails</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="properties">Property Owners</TabsTrigger>
-              <TabsTrigger value="content">Content & Images</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="properties">Properties</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
               <SecureAdminPanel />
+            </TabsContent>
+
+            <TabsContent value="connection" className="mt-6">
+              <AdminConnectionStatus />
+            </TabsContent>
+
+            <TabsContent value="roles" className="mt-6">
+              <RolesAccessOverview />
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
@@ -62,12 +73,6 @@ const SimplifiedAdminDashboard = () => {
 
             <TabsContent value="content" className="mt-6">
               <ContentImageManagement />
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-6">
-              <div className="text-center py-8">
-                <p className="text-gray-500">Admin settings coming soon...</p>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
