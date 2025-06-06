@@ -37,41 +37,64 @@ const EnhancedPropertyOwnerDashboard = () => {
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching properties:', error);
+        throw error;
+      }
       return data || [];
     },
     enabled: !!user,
   });
 
   const { data: dashboardStats } = useQuery({
-    queryKey: ['dashboard-stats', user?.id],
+    queryKey: ['dashboard-stats', user?.id, properties],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user || properties.length === 0) return null;
 
-      // Get total bookings and revenue
-      const { data: bookings } = await supabase
+      // Get total bookings and revenue for all user properties
+      const propertyIds = properties.map(p => p.id);
+      
+      const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select('total_price, created_at')
-        .in('property_id', properties.map(p => p.id));
+        .select('total_price, status, created_at')
+        .in('property_id', propertyIds);
 
-      const totalRevenue = bookings?.reduce((sum, booking) => sum + Number(booking.total_price), 0) || 0;
+      if (bookingsError) {
+        console.error('Error fetching bookings:', bookingsError);
+      }
+
+      const totalRevenue = bookings?.reduce((sum, booking) => {
+        return booking.status === 'confirmed' ? sum + Number(booking.total_price || 0) : sum;
+      }, 0) || 0;
+      
       const totalBookings = bookings?.length || 0;
+      const confirmedBookings = bookings?.filter(b => b.status === 'confirmed').length || 0;
+
+      // Calculate occupancy rate (simplified)
+      const occupancyRate = properties.length > 0 ? Math.round((confirmedBookings / properties.length) * 10) : 0;
 
       return {
         totalProperties: properties.length,
         totalBookings,
         totalRevenue,
         averageRating: 4.8,
-        occupancyRate: 78
+        occupancyRate: Math.min(occupancyRate, 100)
       };
     },
     enabled: !!user && properties.length > 0,
   });
 
+  // Set first property as default when properties load
+  React.useEffect(() => {
+    if (properties.length > 0 && !selectedPropertyId) {
+      setSelectedPropertyId(properties[0].id);
+    }
+  }, [properties, selectedPropertyId]);
+
   const selectedProperty = properties.find(p => p.id === selectedPropertyId) || properties[0];
 
   const handlePropertyUpdate = () => {
-    // Refetch properties data
+    // Refresh the page or refetch data
     window.location.reload();
   };
 

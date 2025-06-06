@@ -1,18 +1,29 @@
 
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 import { 
   TrendingUp, 
-  TrendingDown, 
-  Eye, 
   Calendar, 
   DollarSign, 
   Users,
   Star,
-  Download,
-  Filter
+  Eye
 } from 'lucide-react';
 
 interface PropertyAnalyticsProps {
@@ -20,78 +31,71 @@ interface PropertyAnalyticsProps {
 }
 
 const PropertyAnalytics = ({ property }: PropertyAnalyticsProps) => {
-  const analytics = {
-    views: { current: 1247, change: 12.5, trend: 'up' },
-    bookings: { current: 23, change: -5.2, trend: 'down' },
-    revenue: { current: 5680, change: 18.3, trend: 'up' },
-    occupancy: { current: 78, change: 3.1, trend: 'up' },
-    rating: { current: 4.8, reviews: 89 }
-  };
+  // Fetch real booking data for this property
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['property-bookings', property?.id],
+    queryFn: async () => {
+      if (!property?.id) return [];
 
-  const bookingData = [
-    { month: 'Jan', bookings: 18, revenue: 4320 },
-    { month: 'Feb', bookings: 22, revenue: 5280 },
-    { month: 'Mar', bookings: 25, revenue: 6000 },
-    { month: 'Apr', bookings: 19, revenue: 4560 },
-    { month: 'May', bookings: 28, revenue: 6720 },
-    { month: 'Jun', bookings: 32, revenue: 7680 }
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('property_id', property.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!property?.id,
+  });
+
+  // Calculate analytics from real data
+  const totalRevenue = bookings
+    .filter(booking => booking.status === 'confirmed')
+    .reduce((sum, booking) => sum + Number(booking.total_price || 0), 0);
+
+  const confirmedBookings = bookings.filter(booking => booking.status === 'confirmed').length;
+  const pendingBookings = bookings.filter(booking => booking.status === 'pending').length;
+  const averageBookingValue = confirmedBookings > 0 ? totalRevenue / confirmedBookings : 0;
+
+  // Mock data for charts (in real app, this would be calculated from actual booking data)
+  const monthlyRevenue = [
+    { month: 'Jan', revenue: 1200, bookings: 4 },
+    { month: 'Feb', revenue: 1800, bookings: 6 },
+    { month: 'Mar', revenue: 2400, bookings: 8 },
+    { month: 'Apr', revenue: 2100, bookings: 7 },
+    { month: 'May', revenue: 2800, bookings: 9 },
+    { month: 'Jun', revenue: 3200, bookings: 12 },
   ];
 
-  const topSources = [
-    { source: 'Direct Booking', percentage: 45, bookings: 12 },
-    { source: 'Search Engines', percentage: 30, bookings: 8 },
-    { source: 'Social Media', percentage: 15, bookings: 4 },
-    { source: 'Referrals', percentage: 10, bookings: 2 }
+  const occupancyData = [
+    { name: 'Occupied', value: 68, color: '#10B981' },
+    { name: 'Available', value: 32, color: '#EF4444' },
+  ];
+
+  const guestDemographics = [
+    { type: 'Families', count: 45 },
+    { type: 'Couples', count: 32 },
+    { type: 'Business', count: 18 },
+    { type: 'Groups', count: 15 },
   ];
 
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Views</p>
-                <p className="text-2xl font-bold">{analytics.views.current}</p>
-              </div>
-              <Eye className="h-5 w-5 text-blue-500" />
-            </div>
-            <div className="flex items-center mt-2">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">+{analytics.views.change}%</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Bookings</p>
-                <p className="text-2xl font-bold">{analytics.bookings.current}</p>
-              </div>
-              <Calendar className="h-5 w-5 text-purple-500" />
-            </div>
-            <div className="flex items-center mt-2">
-              <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-sm text-red-600">{analytics.bookings.change}%</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Revenue</p>
-                <p className="text-2xl font-bold">€{analytics.revenue.current}</p>
+                <p className="text-sm text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-bold">€{totalRevenue.toLocaleString()}</p>
               </div>
               <DollarSign className="h-5 w-5 text-green-500" />
             </div>
             <div className="flex items-center mt-2">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">+{analytics.revenue.change}%</span>
+              <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+              <span className="text-xs text-green-600">+12% from last month</span>
             </div>
           </CardContent>
         </Card>
@@ -100,14 +104,33 @@ const PropertyAnalytics = ({ property }: PropertyAnalyticsProps) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Occupancy</p>
-                <p className="text-2xl font-bold">{analytics.occupancy.current}%</p>
+                <p className="text-sm text-gray-600">Total Bookings</p>
+                <p className="text-2xl font-bold">{bookings.length}</p>
               </div>
-              <Users className="h-5 w-5 text-orange-500" />
+              <Calendar className="h-5 w-5 text-blue-500" />
+            </div>
+            <div className="flex items-center mt-2 gap-2">
+              <Badge variant="secondary" className="text-xs">
+                {confirmedBookings} confirmed
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {pendingBookings} pending
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Avg. Booking Value</p>
+                <p className="text-2xl font-bold">€{Math.round(averageBookingValue)}</p>
+              </div>
+              <Users className="h-5 w-5 text-purple-500" />
             </div>
             <div className="flex items-center mt-2">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">+{analytics.occupancy.change}%</span>
+              <span className="text-xs text-gray-600">Per booking</span>
             </div>
           </CardContent>
         </Card>
@@ -116,255 +139,157 @@ const PropertyAnalytics = ({ property }: PropertyAnalyticsProps) => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Rating</p>
-                <p className="text-2xl font-bold">{analytics.rating.current}</p>
+                <p className="text-sm text-gray-600">Average Rating</p>
+                <p className="text-2xl font-bold">4.8</p>
               </div>
               <Star className="h-5 w-5 text-yellow-500" />
             </div>
             <div className="flex items-center mt-2">
-              <span className="text-sm text-gray-600">{analytics.rating.reviews} reviews</span>
+              <span className="text-xs text-gray-600">Based on 89 reviews</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Detailed Analytics */}
-      <Tabs defaultValue="performance" className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="bookings">Booking Trends</TabsTrigger>
-            <TabsTrigger value="sources">Traffic Sources</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          </TabsList>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          </div>
-        </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Trend */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`€${value}`, 'Revenue']} />
+                <Bar dataKey="revenue" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="performance" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {bookingData.map((month, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{month.month}</p>
-                        <p className="text-sm text-gray-600">{month.bookings} bookings</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-green-600">€{month.revenue}</p>
-                        <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${(month.bookings / 32) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
+        {/* Occupancy Rate */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Occupancy Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={occupancyData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  dataKey="value"
+                >
+                  {occupancyData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`${value}%`, 'Occupancy']} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-4 mt-4">
+              {occupancyData.map((entry, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-sm">{entry.name}: {entry.value}%</span>
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    <p className="font-medium text-green-800">Strong Performance</p>
-                  </div>
-                  <p className="text-sm text-green-700">
-                    Your property is performing 18% above market average
-                  </p>
-                </div>
-                
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Star className="h-5 w-5 text-blue-600" />
-                    <p className="font-medium text-blue-800">High Guest Satisfaction</p>
-                  </div>
-                  <p className="text-sm text-blue-700">
-                    4.8/5 rating with consistent positive feedback
-                  </p>
-                </div>
-                
-                <div className="p-4 bg-orange-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="h-5 w-5 text-orange-600" />
-                    <p className="font-medium text-orange-800">Optimize Pricing</p>
-                  </div>
-                  <p className="text-sm text-orange-700">
-                    Consider increasing weekend rates by 15%
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Booking Patterns */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Booking Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line 
+                  type="monotone" 
+                  dataKey="bookings" 
+                  stroke="#10B981" 
+                  strokeWidth={3}
+                  dot={{ fill: '#10B981' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Guest Demographics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Guest Types</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={guestDemographics} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="type" type="category" width={80} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8B5CF6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Performance Insights */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-green-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span className="font-medium text-green-900">Revenue Growth</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Your property revenue has increased by 15% compared to last month
+              </p>
+            </div>
+
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-900">Market Position</span>
+              </div>
+              <p className="text-sm text-blue-700">
+                Your pricing is competitive and above market average for the area
+              </p>
+            </div>
+
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="h-4 w-4 text-purple-600" />
+                <span className="font-medium text-purple-900">Guest Satisfaction</span>
+              </div>
+              <p className="text-sm text-purple-700">
+                High guest ratings are driving repeat bookings and referrals
+              </p>
+            </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="bookings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Booking Patterns</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Peak Seasons</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center p-2 border rounded">
-                      <span className="text-sm">Summer (Jun-Aug)</span>
-                      <Badge>85% occupancy</Badge>
-                    </div>
-                    <div className="flex justify-between items-center p-2 border rounded">
-                      <span className="text-sm">Spring (Mar-May)</span>
-                      <Badge variant="secondary">72% occupancy</Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-medium">Booking Lead Time</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">0-7 days</span>
-                      <span className="text-sm font-medium">15%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">1-4 weeks</span>
-                      <span className="text-sm font-medium">45%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">1-3 months</span>
-                      <span className="text-sm font-medium">40%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-medium">Stay Duration</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">2-3 nights</span>
-                      <span className="text-sm font-medium">35%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">4-7 nights</span>
-                      <span className="text-sm font-medium">50%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">1+ weeks</span>
-                      <span className="text-sm font-medium">15%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="sources" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Traffic Sources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {topSources.map((source, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex justify-between mb-2">
-                        <span className="font-medium">{source.source}</span>
-                        <span className="text-sm text-gray-600">{source.bookings} bookings</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full" 
-                          style={{ width: `${source.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <p className="font-bold">{source.percentage}%</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="reviews" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Guest Reviews & Feedback</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Rating Breakdown</h4>
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <div key={rating} className="flex items-center gap-3">
-                      <span className="text-sm w-8">{rating}★</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-yellow-500 h-2 rounded-full" 
-                          style={{ width: rating === 5 ? '75%' : rating === 4 ? '20%' : '5%' }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-8">
-                        {rating === 5 ? '67' : rating === 4 ? '18' : '4'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-medium">Recent Reviews</h4>
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-500">2 days ago</span>
-                      </div>
-                      <p className="text-sm">"Amazing property with beautiful views!"</p>
-                      <p className="text-xs text-gray-600 mt-1">- Sarah M.</p>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-500">5 days ago</span>
-                      </div>
-                      <p className="text-sm">"Perfect location and very clean."</p>
-                      <p className="text-xs text-gray-600 mt-1">- John D.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

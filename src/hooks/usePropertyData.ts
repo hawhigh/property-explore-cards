@@ -11,10 +11,31 @@ export const usePropertyData = (propertyId?: string) => {
         const { data: properties, error: fetchError } = await supabase
           .from('properties')
           .select('*')
+          .eq('status', 'active')
           .limit(1);
 
-        if (fetchError) throw fetchError;
+        if (fetchError) {
+          console.error('Error fetching properties:', fetchError);
+          throw fetchError;
+        }
         return properties && properties.length > 0 ? properties[0] : null;
+      }
+
+      // Validate that propertyId is a valid UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(propertyId)) {
+        console.log('Invalid property ID format, fetching first available property');
+        const { data: fallbackProperties, error: fallbackError } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('status', 'active')
+          .limit(1);
+
+        if (fallbackError) {
+          console.error('Error fetching fallback properties:', fallbackError);
+          throw fallbackError;
+        }
+        return fallbackProperties && fallbackProperties.length > 0 ? fallbackProperties[0] : null;
       }
 
       // Try to fetch the specific property by ID
@@ -25,13 +46,18 @@ export const usePropertyData = (propertyId?: string) => {
         .single();
 
       if (specificError) {
+        console.error('Error fetching specific property:', specificError);
         // If property not found, try to get any property as fallback
         const { data: fallbackProperties, error: fallbackError } = await supabase
           .from('properties')
           .select('*')
+          .eq('status', 'active')
           .limit(1);
 
-        if (fallbackError) throw fallbackError;
+        if (fallbackError) {
+          console.error('Error fetching fallback properties:', fallbackError);
+          throw fallbackError;
+        }
         return fallbackProperties && fallbackProperties.length > 0 ? fallbackProperties[0] : null;
       }
 
